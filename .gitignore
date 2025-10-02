@@ -16,6 +16,7 @@ venv/
 *.lock
 poetry.lock
 pip-selfcheck.json
+poetry_help.txt
 
 # Distribution / packaging
 build/
@@ -32,3 +33,19 @@ dist/
 # OS files
 .DS_Store
 Thumbs.db
+
+
+#ХУЙЗНАЕТЧЕ)
+.git
+.venv
+__pycache__
+*.pyc
+*.log
+.env
+dist
+build
+node_modules
+data
+.idea
+.vscode
+
