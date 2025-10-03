@@ -1,54 +1,35 @@
-#version: "3.9"             # версия синтаксиса docker-compose
-
-services:                  # тут описываем "сервисы" = контейнеры
-
-  db:                      # сервис Postgres
-    image: postgres:16-alpine        # образ для контейнера (Postgres 16 на базе Alpine Linux)
-    container_name: tgchats_db       # имя контейнера (чтобы удобно обращаться через docker ps/exec)
-    environment:                      # переменные окружения, которые читает Postgres
-      POSTGRES_USER: ${DB_USER:-postgres}        # имя пользователя (берётся из .env или "postgres" по умолчанию)
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres} # пароль
-      POSTGRES_DB: ${DB_NAME:-telegram_chats}     # имя базы
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tgchats_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-telegram_chats}
     ports:
-      - "${DB_PORT:-5432}:5432"       # пробрасываем порт: host:container (5432 на хосте → 5432 в контейнере)
+      - "${DB_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data   # монтируем volume для хранения данных (чтобы не потерялись при пересоздании контейнера)
-    healthcheck:                     # проверка "жив ли сервис"
-      test: ["CMD-SHELL","pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-telegram_chats}"]
-      interval: 5s                    # раз в 5 секунд
-      timeout: 3s                     # ждать максимум 3 сек
-      retries: 10                     # максимум 10 попыток
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-telegram_chats}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-
-    # docker compose up -d db           # запустить только БД
-    # docker compose logs -f db         # смотреть логи БД
-    # docker exec -it {container_name} bash   # войти внутрь контейнера
-    # docker exec -it {container_name} pg_isready -U postgres -d {DB_NAME}
-    # docker exec -it {container_name} psql -U postgres -d {DB_NAME}
-    # docker compose down db            # остановить БД (оставить данные)
-    # docker compose down -v db         # остановить и снести данные
-
-
-  app:                      # сервис твоего приложения
-    build:                   # как собрать образ
-      context: .             # текущая директория (где Dockerfile)
-      dockerfile: Dockerfile # какой Dockerfile использовать
-    container_name: tgchats_app       # имя контейнера
-    depends_on:               # указываем зависимость: app ждёт пока db будет "healthy"
+  app:
+    build: .
+    container_name: tgchats_app
+    depends_on:
       db:
         condition: service_healthy
-    env_file: .env             # подтягиваем переменные окружения из .env
+    env_file: .env
+    environment:
+      PYTHONPATH: /app
+      DB_HOST: db
+      DB_PORT: ${DB_PORT:-5432}
     ports:
-      - "8000:8000"            # пробрасываем порт приложения (например, если FastAPI/Flask слушает 8000)
-    volumes:
-      - ./app:/app/src                 #  монтируем текущую папку внутрь контейнера (hot-reload: изменения в коде сразу в контейнере)
+      - "8000:8000"
+    command: ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--reload"]
 
-    # app - название сервиса
-    # docker compose up -d app          # запустить только сервис
-    # docker compose logs -f app        # смотреть логи сервиса
-    # docker compose restart app        # перезапустить сервис
-    # docker exec -it {container_name} bash  # войти внутрь контейнера
-    # docker compose down app           # остановить сервис
-
-volumes:                     # описание volume (для хранения данных БД)
+volumes:
   pgdata: {}
