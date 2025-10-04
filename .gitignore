@@ -41,7 +41,6 @@ Thumbs.db
 __pycache__
 *.pyc
 *.log
-.env
 dist
 build
 node_modules
@@ -49,3 +48,4 @@ data
 .idea
 .vscode
 
+*.env
