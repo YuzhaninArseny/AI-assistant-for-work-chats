@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 import os
-
+from app.api.routes.messages import router as messages_router
 app = FastAPI()
 
+app.include_router(messages_router)
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "App is alive!"}
