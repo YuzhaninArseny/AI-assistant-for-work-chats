@@ -1,0 +1,4 @@
+services:
+  tgbot:
+    build: bot
+    env_file: "tg.env"
