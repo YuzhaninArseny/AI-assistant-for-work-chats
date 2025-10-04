@@ -1,7 +1,9 @@
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
+from aiohttp import ClientSession
 
+from api import save_message
 router = Router()
 
 
@@ -11,8 +13,8 @@ async def start(message: Message):
 
 
 @router.message()
-async def msg(message: Message):
+async def msg(message: Message, aiohttp_session: ClientSession):
     if message.chat.type in {"group", "supergroup"}:
-        await message.answer(f"Сохраняем сообщение из {message.chat.id}: {message.text}")
+        await save_message(aiohttp_session, message)
     else:
         await message.answer(f": {message.text}")

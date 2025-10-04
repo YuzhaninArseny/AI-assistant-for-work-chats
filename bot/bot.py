@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+import aiohttp
 from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
@@ -27,7 +28,9 @@ async def main():
         BotCommand(command="search", description="Search by keywords"),
     ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
-    await dispather.start_polling(bot, polling_timeout=60)
+    async with aiohttp.ClientSession() as aiohttp_session:
+        dispather["aiohttp_session"] = aiohttp_session
+        await dispather.start_polling(bot, polling_timeout=60)
 
 
 if __name__ == '__main__':

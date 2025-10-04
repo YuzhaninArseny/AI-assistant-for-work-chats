@@ -6,6 +6,7 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY bot.py .
+COPY api.py .
 COPY tgbot tgbot
 
 ENTRYPOINT ["python", "bot.py"]
