@@ -3,6 +3,8 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
+from app.schemas.examples import TELEGRAM_MESSAGE_EXAMPLE
+
 
 class TelegramUpdate(BaseModel):
     """
@@ -21,7 +23,7 @@ class TelegramUpdate(BaseModel):
     """
 
     update_id: int
-    message: Optional["TelegramMessage"] = None
+    message: Optional[TelegramMessage] = None
 
 
 class TelegramMessage(BaseModel):
@@ -54,7 +56,7 @@ class TelegramMessage(BaseModel):
     - **forward_from (TelegramUser | None)** — объект пользователя, от которого сообщение было переслано.
       *Необязательное поле.*
     """
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, json_schema_extra={"example": TELEGRAM_MESSAGE_EXAMPLE})
     message_id: int
     from_: Optional[TelegramUser] = Field(None, alias="from")
     chat: TelegramChat
