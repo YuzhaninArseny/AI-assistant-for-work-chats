@@ -1,11 +1,9 @@
-from http import HTTPStatus
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.message_service import MessageService
+from saver.src.saver_app.services.message_service import MessageService
 from fastapi import APIRouter, status, Depends
-from app.schemas.tg_update import TelegramMessage
-from app.db.database import get_session
+from saver.src.saver_app.schemas.tg_update import TelegramMessage
+from saver.src.saver_app.db.database import get_session
 router = APIRouter(prefix="/messages", tags=["messages"])
 
 

@@ -9,7 +9,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column
 from pydantic import BaseModel, Field
-from app.models.base import Base
+from .base import Base
 
 class Message(Base):
     """

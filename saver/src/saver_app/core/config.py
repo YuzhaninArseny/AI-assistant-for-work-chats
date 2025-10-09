@@ -29,9 +29,9 @@ class Settings(BaseSettings):
 
     # SQLite fallback
     USE_SQLITE: bool = False
-    SQLITE_PATH: str = "./data/app.db"
+    SQLITE_PATH: str = "./data/saver_app.db"
 
-    # Явный URL для alembic (если хочется переопределить)
+    # Явный URL для migrations (если хочется переопределить)
     ALEMBIC_DB_URL: str | None = None
 
     @computed_field

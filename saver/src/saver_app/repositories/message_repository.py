@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from app.core.config import settings
 from datetime import datetime
 from app.schemas.tg_update import TelegramMessage, TelegramUser, TelegramChat
-from app.models.messages import Message
+from app
 
 
 class MessageRepository:

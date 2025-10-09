@@ -24,15 +24,15 @@ services:
         condition: service_healthy
     env_file: .env
     environment:
-      PYTHONPATH: /app
+      PYTHONPATH: /saver_app
       DB_HOST: db
       DB_PORT: ${DB_PORT:-5432}
     volumes:
-      - ./saver/alembic:/app/alembic
-      - ./saver/alembic.ini:/app/alembic.ini:ro
+      - ./saver/migrations:/saver_app/migrations
+      - ./saver/migrations.ini:/saver_app/migrations.ini:ro
     ports:
       - "8000:8000"
-    command: ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--reload"]
+    command: ["uvicorn","saver_app.main:saver_app","--host","0.0.0.0","--port","8000","--reload"]
 
   tgbot:
     build: bot
