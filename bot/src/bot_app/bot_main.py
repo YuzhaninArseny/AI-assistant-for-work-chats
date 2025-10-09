@@ -5,13 +5,14 @@ import aiohttp
 from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
-from tgbot import draft, search, stats, summary, main_subrouter
+from bot.src.bot_app.routers import main_subrouter
+from bot.src.bot_app.commands import draft, search, stats, summary
 
 TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TOKEN)
-dispather = Dispatcher()
+dispatcher = Dispatcher()
 
-dispather.include_routers(
+dispatcher.include_routers(
     draft.router,
     search.router,
     stats.router,
@@ -29,8 +30,8 @@ async def main():
     ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
     async with aiohttp.ClientSession() as aiohttp_session:
-        dispather["aiohttp_session"] = aiohttp_session
-        await dispather.start_polling(bot, polling_timeout=60)
+        dispatcher["aiohttp_session"] = aiohttp_session
+        await dispatcher.start_polling(bot, polling_timeout=60)
 
 
 if __name__ == '__main__':

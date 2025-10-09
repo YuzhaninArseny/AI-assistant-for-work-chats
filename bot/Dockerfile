@@ -5,8 +5,8 @@ WORKDIR /bot
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY bot.py .
-COPY api.py .
-COPY tgbot tgbot
+COPY src/bot_app/bot_main.py .
+COPY src/bot_app/api/api.py .
+COPY src/bot_app tgbot
 
 ENTRYPOINT ["python", "bot.py"]
