@@ -1,10 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
-from app.core.config import settings
+from saver_app.core.config import settings
 from datetime import datetime
-from app.schemas.tg_update import TelegramMessage, TelegramUser, TelegramChat
-from app
-
+from saver_app.schemas.tg_update import TelegramMessage, TelegramUser, TelegramChat
+from saver_app.models.messages import Message
 
 class MessageRepository:
     def __init__(self, session: AsyncSession):
@@ -13,7 +12,7 @@ class MessageRepository:
     async def add(self, message: TelegramMessage) -> TelegramMessage:
         db_message = Message(
             message_id=message.message_id,
-            user_id=message.from_.id if message.from_ else None,
+            user_id=message.from_.id,
             chat_id=message.chat.id,
             content=message.text,
             time_sent=datetime.fromtimestamp(message.date),

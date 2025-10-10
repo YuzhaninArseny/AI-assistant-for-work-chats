@@ -36,6 +36,7 @@ services:
 
   tgbot:
     build: bot
+    container_name: bot_app
     env_file: "tg.env"
 volumes:
   pgdata: {}

@@ -1,6 +1,5 @@
 import logging
 
-import aiohttp
 from aiogram.types import Message
 from aiohttp import ClientSession
 

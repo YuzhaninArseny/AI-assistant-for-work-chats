@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.pool import NullPool  # опционально для тестов/скриптов
-from app.core.config import settings
+from saver_app.core.config import settings
 
 engine = create_async_engine(
     settings.DATABASE_URL,

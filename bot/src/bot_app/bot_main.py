@@ -5,8 +5,8 @@ import aiohttp
 from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
-from bot.src.bot_app.routers import main_subrouter
-from bot.src.bot_app.commands import draft, search, stats, summary
+from bot_app.routers import main_subrouter
+from bot_app.commands import draft, search, stats, summary
 
 TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TOKEN)

@@ -5,8 +5,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from os import getenv
 from alembic import context
-from app.models.base import Base
-from app.models.messages import Message
+from saver_app.models.base import Base
+from saver_app.models.messages import Message
 from dotenv import load_dotenv
 
 # this is the Alembic Config object, which provides
