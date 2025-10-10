@@ -37,5 +37,11 @@ services:
   tgbot:
     build: bot
     env_file: "tg.env"
+
+  summarizer:
+    build: summarizer
+    env_file: .env
+    ports:
+      - "1234:8080"
 volumes:
   pgdata: {}
