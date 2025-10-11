@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
-from examples import TELEGRAM_MESSAGE_EXAMPLE
+from saver_app.schemas.examples import TELEGRAM_MESSAGE_EXAMPLE
 
 
 class TelegramUpdate(BaseModel):

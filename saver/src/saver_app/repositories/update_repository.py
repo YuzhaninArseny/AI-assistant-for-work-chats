@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
-from app.core.config import settings
-from app.schemas.tg_update import TelegramUpdate
+from saver_app.core.config import settings
+from saver_app.schemas.tg_update import TelegramUpdate
 
 
 class UpdateRepository:

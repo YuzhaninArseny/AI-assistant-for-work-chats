@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiohttp import ClientSession
 
-from api import save_message
+from bot_app.api.api import save_message
 router = Router()
 
 
