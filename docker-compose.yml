@@ -47,6 +47,12 @@ services:
     env_file: "tg.env"
     ports:
       - "6677"
+
+  summarizer:
+    build: summarizer
+    env_file: .env
+    ports:
+      - "1234:8080"
+
 volumes:
   pgdata: {}
-
