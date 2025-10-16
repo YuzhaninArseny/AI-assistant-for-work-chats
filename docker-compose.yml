@@ -17,25 +17,42 @@ services:
       retries: 10
 
   saver:
-    build: saver
-    container_name: tgchats_app
+    build:
+      context:
+        ./saver
+      dockerfile:
+        ./Dockerfile
+    container_name: saver_app
     depends_on:
       db:
         condition: service_healthy
     env_file: .env
     environment:
-      PYTHONPATH: /app
       DB_HOST: db
       DB_PORT: ${DB_PORT:-5432}
     volumes:
-      - ./saver/alembic:/app/alembic
-      - ./saver/alembic.ini:/app/alembic.ini:ro
+      - ./saver/migrations:/saver_app/migrations
+      - ./saver/migrations.ini:/saver_app/migrations.ini:ro
     ports:
       - "8000:8000"
-    command: ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--reload"]
+    #command: ["uvicorn","saver_app.main:saver_app","--host","0.0.0.0","--port","8000","--reload"]
 
   tgbot:
-    build: bot
+    build:
+      context:
+        ./bot
+      dockerfile:
+        ./Dockerfile
+    container_name: bot_app
     env_file: "tg.env"
+    ports:
+      - "6677"
+
+  summarizer:
+    build: summarizer
+    env_file: .env
+    ports:
+      - "1234:8080"
+
 volumes:
   pgdata: {}
