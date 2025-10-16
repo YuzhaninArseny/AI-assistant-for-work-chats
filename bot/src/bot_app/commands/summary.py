@@ -15,4 +15,5 @@ def summary_filter(message: Message):
 
 @router.message(Command(commands="summary"), summary_filter)
 async def summary(message: Message, group: str):
+    message.
     await message.answer(f"Summary for {group}")
