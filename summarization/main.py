@@ -1,20 +1,15 @@
+from summarization_model import SummarizationModel
 from fastapi import FastAPI
-from transformers import MBartTokenizer, MBartForConditionalGeneration
-from typing import List
 
-# моделька весит около 3.5Гб (867М параметров)
-model_name = "IlyaGusev/mbart_ru_sum_gazeta"
-tokenizer = MBartTokenizer.from_pretrained(model_name)
-model = MBartForConditionalGeneration.from_pretrained(model_name)
-
-
-
+model = SummarizationModel()
 app = FastAPI()
 
 @app.get('get-summarization')
-def get_summarization(messages: List[str]):
+def get_summarization(user_id, chat_id):
     # здесь можно отдать власть Димуле, чтобы он составил хороший промпт
-    prompt = f"""
-            сообщения:
-                {" ".join(messages)}
-        """
+    messages = db_client.get_messages(user_id, chat_id)
+
+    text = f"""{" ".join(messages)}"""
+    summarize_text = model.summarize(text)
+
+    return summarize_text
