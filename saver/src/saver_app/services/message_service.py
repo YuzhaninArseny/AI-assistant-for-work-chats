@@ -11,3 +11,9 @@ class MessageService:
 
     async def add(self, message: TelegramMessage):
         return await self._messages.add(message)
+
+    async def get_user_messages(self, user_id: int):
+        return await self._messages.get_user_messages(user_id)
+
+    async def get_chat_messages(self, chat_id: int):
+        return await self._messages.get_chat_messages(chat_id)
