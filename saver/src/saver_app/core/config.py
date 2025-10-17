@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-
+from dotenv import find_dotenv
 from pydantic import computed_field, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# ЭТО полу-костыль, то есть два dotenv - внутри микросервиса и в репозитории. надо явно их обоих импортить и разделять
+env_path = find_dotenv(usecwd=True) or ".env"
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -31,8 +33,6 @@ class Settings(BaseSettings):
     USE_SQLITE: bool = False
     SQLITE_PATH: str = "./data/saver_app.db"
 
-    # Явный URL для migrations (если хочется переопределить)
-    ALEMBIC_DB_URL: str | None = None
 
     @computed_field
     @property
@@ -40,15 +40,11 @@ class Settings(BaseSettings):
         """
         Итоговый URL подключения:
         1) Если USE_SQLITE=True → sqlite+aiosqlite:///<abs_path>
-        2) Если задан ALEMBIC_DB_URL → берём его
         3) Иначе собираем из DB_*
         """
         if self.USE_SQLITE:
             path = Path(self.SQLITE_PATH).absolute()
             return f"sqlite+aiosqlite:///{path}"
-
-        if self.ALEMBIC_DB_URL:
-            return self.ALEMBIC_DB_URL
 
         assert (
             self.DB_SCHEME
@@ -63,6 +59,14 @@ class Settings(BaseSettings):
             f"{self.DB_SCHEME}://{self.DB_USER}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
+
+    @computed_field
+    @property
+    def ALEMBIC_URL(self) -> str:
+        return (
+            f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
+
 
 
 settings = Settings()
