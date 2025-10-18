@@ -5,7 +5,7 @@ from typing import Any, Optional
 from fastapi import HTTPException, status
 from saver_app.core.config import settings
 from datetime import datetime
-from saver_app.schemas.tg_update import TelegramMessage, TelegramUser, TelegramChat
+from saver_app.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
 from saver_app.models.messages import Message
 
 # НАДО добавить общий Класс BaseRepo или абстрактный метод, который будет из таблицы table и по значению индекс_колонки
@@ -20,6 +20,7 @@ class MessageRepository:
             user_id=message.from_.id,
             chat_id=message.chat.id,
             content=message.text,
+            username=message.from_.username,
             time_sent=datetime.fromtimestamp(message.date),
         )
 
@@ -33,7 +34,7 @@ class MessageRepository:
             **{
                 "from": TelegramUser(
                     id=db_message.user_id,
-                    username="mocked"
+                    username=db_message.username
                 )
             }
         )
@@ -54,9 +55,10 @@ class MessageRepository:
             **{
                 "from": TelegramUser(
                     id=db_message.user_id,
-                    username="mocked"
+                    username=db_message.username
                 )
-            }
+            },
+            text=db_message.content
         ) for db_message in db_messages]
         return result_list
 
@@ -76,7 +78,7 @@ class MessageRepository:
             **{
                 "from": TelegramUser(
                     id=db_message.user_id,
-                    username="mocked"
+                    username=db_message.username
                 )
             }
         ) for db_message in db_messages]

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, status
-from saver_app.schemas.tg_update import TelegramUpdate
+from saver_app.schemas.TelegramApiDtos import TelegramUpdate
 
 router = APIRouter(prefix="/updates", tags=["updates"])
 

@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-telegram_chats}
     ports:
-      - "${DB_PORT:-15432}:5432"
+      - "${DB_PORT_OUT:-15432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -26,17 +26,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file: saver/.env
+    env_file: .env
     environment:
       DB_HOST: db
       DB_PORT: ${DB_PORT:-5432}
     volumes:
-      - ./saver/migrations:/saver_app/migrations
-      - ./saver/migrations.ini:/saver_app/migrations.ini:ro
+      - ./saver/src/saver_app/db/migrations:/app/src/saver_app/db/migrations
+      - ./saver/src/saver_app:/app/src/saver_app
+      - ./saver/alembic.ini:/app/alembic.ini
     ports:
       - "8000:8000"
     #command: ["uvicorn","saver_app.main:saver_app","--host","0.0.0.0","--port","8000","--reload"]
-    #command: uvicorn src.saver_app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn src.saver_app.main:app --host 0.0.0.0 --port 8000 --reload
 
   tgbot:
     build:
@@ -49,11 +50,11 @@ services:
     ports:
       - "6677"
 
-  summarizer:
-    build: summarizer
-    env_file: .env
-    ports:
-      - "1234:8080"
+#  summarizer:
+#    build: summarizer
+#    env_file: .env
+#    ports:
+#      - "1234:8080"
 
 volumes:
   pgdata: {}

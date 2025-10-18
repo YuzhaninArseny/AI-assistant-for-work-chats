@@ -6,21 +6,16 @@ from sqlalchemy import pool
 from os import getenv
 from alembic import context
 from saver_app.models.base import Base
+from saver_app.core.config import settings
 from saver_app.models.messages import Message
 from dotenv import load_dotenv
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-DB_USER = getenv("DB_USER", "postgres")
-DB_PASSWORD = urllib.parse.quote_plus(getenv("DB_PASSWORD", ""))
-DB_NAME = getenv("DB_NAME", "postgres")
-
-DB_PORT = getenv("DB_PORT", "5432")
-DB_HOST = getenv("DB_HOST", "localhost")
 
 SQLALCHEMY_URL = (
-    f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    settings.ALEMBIC_URL
 )
 config.set_main_option("sqlalchemy.url", SQLALCHEMY_URL)
 # Interpret the config file for Python logging.
@@ -58,6 +53,9 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+        compare_server_default=True
+
     )
 
     with context.begin_transaction():
