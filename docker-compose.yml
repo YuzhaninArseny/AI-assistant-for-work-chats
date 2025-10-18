@@ -48,8 +48,8 @@ services:
     ports:
       - "6677"
 
-  summarizer:
-    build: summarizer
+  summarization:
+    build: summarization
     env_file: .env
     ports:
       - "1234:8080"

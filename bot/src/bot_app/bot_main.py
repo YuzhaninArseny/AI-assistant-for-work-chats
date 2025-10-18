@@ -4,12 +4,19 @@ import os
 import aiohttp
 from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from bot_app.routers import main_subrouter
 from bot_app.commands import draft, search, stats, summary
 
 TOKEN = os.getenv("BOT_TOKEN")
-bot = Bot(token=TOKEN)
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.MARKDOWN_V2
+    )
+)
 dispatcher = Dispatcher()
 
 dispatcher.include_routers(
