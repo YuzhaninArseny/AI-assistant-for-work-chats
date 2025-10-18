@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 
 import aiohttp
@@ -17,6 +18,7 @@ dispatcher.include_routers(
     search.router,
     stats.router,
     summary.router,
+
     main_subrouter.router
 )
 
@@ -33,6 +35,7 @@ async def main():
         dispatcher["aiohttp_session"] = aiohttp_session
         await dispatcher.start_polling(bot, polling_timeout=60)
 
+logging.getLogger().setLevel(logging.INFO)
 
 if __name__ == '__main__':
     asyncio.run(main())

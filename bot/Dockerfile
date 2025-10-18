@@ -8,5 +8,5 @@ RUN pip install -r requirements.txt
 
 COPY src/ ./src/
 ENV PYTHONPATH=src/
-CMD ["ls"]
+#CMD ["ls"]
 CMD ["python", "-m", "src.bot_app.bot_main"]
