@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     DB_SCHEME: str | None = None
     DB_HOST: str | None = None
     DB_PORT: int | None = None
+    DB_PORT_OUT: int | None = None
     DB_USER: str | None = None
     DB_PASSWORD: str | None = None
     DB_NAME: str | None = None
