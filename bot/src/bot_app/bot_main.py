@@ -4,6 +4,7 @@ import os
 
 import aiohttp
 from aiogram import Dispatcher, Bot
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 from bot_app.routers import main_subrouter
@@ -11,7 +12,7 @@ from bot_app.commands import draft, search, stats, summary, groups
 
 TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TOKEN)
-dispatcher = Dispatcher()
+dispatcher = Dispatcher(storage=MemoryStorage())
 
 dispatcher.include_routers(
     draft.router,
