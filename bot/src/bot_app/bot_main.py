@@ -7,7 +7,7 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 from bot_app.routers import main_subrouter
-from bot_app.commands import draft, search, stats, summary
+from bot_app.commands import draft, search, stats, summary, groups
 
 TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TOKEN)
@@ -18,6 +18,7 @@ dispatcher.include_routers(
     search.router,
     stats.router,
     summary.router,
+    groups.router,
 
     main_subrouter.router
 )
@@ -29,6 +30,7 @@ async def main():
         BotCommand(command="stats", description="Message stats"),
         BotCommand(command="draft", description="Draft answer"),
         BotCommand(command="search", description="Search by keywords"),
+        BotCommand(command="groups", description="View my groups"),
     ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
     async with aiohttp.ClientSession() as aiohttp_session:
