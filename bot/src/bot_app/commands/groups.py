@@ -1,0 +1,63 @@
+from aiogram import Router
+from aiogram.filters import Command
+from aiogram.filters.callback_data import CallbackData
+from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from magic_filter import F
+
+from bot_app.api.subscriptions import get_user_groups, unsubscribe_user
+from bot_app.commands.groups_kb import ACTION_PAGE, ACTION_VIEW_GROUP, ACTION_UNSUBSCRIBE, ACTION_EMPTY, \
+    create_kb
+
+router = Router()
+
+
+class GroupsCBDataFactory(CallbackData, prefix='groups'):
+    action: str
+    payload: int
+
+
+@router.message(Command("groups"))
+async def add_group(message: Message):
+    groups = await get_user_groups(message.from_user.id)
+    if groups:
+        buttons_markup = create_kb(groups, ACTION_VIEW_GROUP, GroupsCBDataFactory)
+        await message.answer("Группы, на обновления в которых вы подписаны:", reply_markup=buttons_markup)
+    else:
+        await message.answer("Вы пока не добавили никаких групп. "
+                             "Воспользуйтесь ссылкой для добавления группы в бота")
+
+
+@router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_PAGE))
+async def group_page_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory):
+    markup = create_kb(await get_user_groups(callback.message.from_user.id),
+                       ACTION_VIEW_GROUP,
+                       GroupsCBDataFactory,
+                       current_page=callback_data.payload)
+    await callback.message.edit_reply_markup(reply_markup=markup)
+    await callback.answer(callback.data)
+
+
+@router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_VIEW_GROUP))
+async def group_view_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory):
+    keyborad_builder = InlineKeyboardBuilder()
+    keyborad_builder.row(InlineKeyboardButton(
+        text="Unsubscribe",
+        callback_data=GroupsCBDataFactory(action=ACTION_UNSUBSCRIBE, payload=callback_data.payload).pack()
+    ))
+    markup = keyborad_builder.as_markup()
+    await callback.message.answer(f"Инфо про группу {callback_data.payload}", reply_markup=markup)
+    await callback.answer()
+
+
+@router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_UNSUBSCRIBE))
+async def group_unsub_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory):
+    # TODO: error handling
+    await unsubscribe_user(callback.from_user.id, callback_data.payload)
+    await callback.message.answer(f"Вы отписаны от группы")
+    await callback.answer()
+
+
+@router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_EMPTY))
+async def group_nop_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory):
+    await callback.answer()

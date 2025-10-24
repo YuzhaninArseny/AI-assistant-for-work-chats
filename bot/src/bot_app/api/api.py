@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from aiogram.types import Message
@@ -35,3 +36,18 @@ async def save_message(aios: ClientSession, message: Message):
     if r.status != 201:
         logging.error(f"Couldn't save message")
         logging.error(r.text)
+
+
+async def summarize(chat_id: int) -> str:
+    await asyncio.sleep(5)
+    return f"summarized text for chat {chat_id}"
+
+
+async def search(char_id: int, query: str) -> str:
+    await asyncio.sleep(3)
+    return f"search result for '{query}' in chat {char_id}"
+
+
+async def draft(chat_id: int) -> str:
+    await asyncio.sleep(5)
+    return f"draft text for chat {chat_id}"
