@@ -1,5 +1,5 @@
 [project]
-name = "messages-saver-service"
+name = "command-service"
 version = "0.1.0"
 description = "v1"
 requires-python = ">=3.12"
@@ -7,7 +7,7 @@ dependencies = [
     "pydantic-settings>=2.11,<3",
     "fastapi>=0.118,<0.119",
     "uvicorn[standard]>=0.37,<0.38",
-    "psycopg[binary,async]>=3.2,<4.0",
+    "psycopg[async]>=3.2,<4.0",
     "asyncpg>=0.29,<0.30",
     "sqlalchemy==2.0.44",
 ]
@@ -18,7 +18,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry]
-packages = [{ include = "saver_app", from = "src" }]
+packages = [{ include = "command_service_app", from = "src" }]
 
 [tool.poetry.dependencies]
 shared = { path = "../shared", develop = true }
