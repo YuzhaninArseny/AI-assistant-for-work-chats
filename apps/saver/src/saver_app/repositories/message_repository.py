@@ -1,12 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from sqlalchemy.engine import ScalarResult
-from typing import Any, Optional
 from fastapi import HTTPException, status
-from saver_app.core.config import settings
 from datetime import datetime
-from saver_app.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
-from saver_app.models.messages import Message
+from apps.shared.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
+from apps.shared.models.messages import Message
 
 # НАДО добавить общий Класс BaseRepo или абстрактный метод, который будет из таблицы table и по значению индекс_колонки
 # index_column доставать list[TableORM]

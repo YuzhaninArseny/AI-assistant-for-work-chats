@@ -1,14 +1,9 @@
-import sys
 from logging.config import fileConfig
-import urllib.parse
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from os import getenv
 from alembic import context
-from saver_app.models.base import Base
+from apps.shared.models.base import Base
 from saver_app.core.config import settings
-from saver_app.models.messages import Message
-from dotenv import load_dotenv
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

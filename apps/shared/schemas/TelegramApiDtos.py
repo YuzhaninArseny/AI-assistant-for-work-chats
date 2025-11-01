@@ -1,9 +1,8 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
-from datetime import datetime
 
-from saver_app.schemas.examples import TELEGRAM_MESSAGE_EXAMPLE
+from apps.shared.schemas.examples import TELEGRAM_MESSAGE_EXAMPLE
 
 
 class TelegramUpdate(BaseModel):
