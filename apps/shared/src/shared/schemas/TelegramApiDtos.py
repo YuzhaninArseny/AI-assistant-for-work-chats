@@ -2,7 +2,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 
-from apps.shared.schemas.examples import TELEGRAM_MESSAGE_EXAMPLE
+from apps.shared.src.shared.schemas.examples import TELEGRAM_MESSAGE_EXAMPLE
 
 
 class TelegramUpdate(BaseModel):

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from apps.shared.schemas import TelegramUpdate
+from apps.shared.src.shared.schemas import TelegramUpdate
 
 
 class UpdateRepository:

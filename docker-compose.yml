@@ -19,7 +19,7 @@ services:
   saver:
     build:
       context:
-        ./saver
+        ./apps/saver
       dockerfile:
         ./Dockerfile
     container_name: saver_app

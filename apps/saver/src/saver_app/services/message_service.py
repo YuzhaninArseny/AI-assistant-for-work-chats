@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from saver_app.repositories.message_repository import MessageRepository
-from apps.shared.schemas.TelegramApiDtos import TelegramMessage
+from apps.shared.src.shared.schemas.TelegramApiDtos import TelegramMessage
 
 
 class MessageService:

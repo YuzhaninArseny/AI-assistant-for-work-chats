@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from datetime import datetime
-from apps.shared.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
-from apps.shared.models.messages import Message
+from apps.shared.src.shared.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
+from apps.shared.src.shared.models.messages import Message
 
 # НАДО добавить общий Класс BaseRepo или абстрактный метод, который будет из таблицы table и по значению индекс_колонки
 # index_column доставать list[TableORM]
