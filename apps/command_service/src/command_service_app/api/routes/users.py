@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from saver_app.services.message_service import MessageService
+from command_service_app.services.message_service import MessageService
 from fastapi import APIRouter, Depends
 from shared.schemas.TelegramApiDtos import TelegramMessage
 from shared.db.database import get_session

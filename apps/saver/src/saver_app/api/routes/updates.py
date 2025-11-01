@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from apps.shared.src.shared.schemas import TelegramUpdate
+from shared.schemas.TelegramApiDtos import TelegramUpdate
 
 router = APIRouter(prefix="/updates", tags=["updates"])
 

@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.pool import NullPool  # опционально для тестов/скриптов
-from saver_app.core.config import settings
+from shared.core.config import settings
 
 engine = create_async_engine(
     settings.DATABASE_URL,
@@ -17,6 +17,7 @@ SessionFactory = async_sessionmaker(
     class_=AsyncSession,
 )
 
+#ЗДЕСЬ НАДО ОСТАВИТЬ ТОЛЬКО ФАБРИКИ, А САМИ ФУНКЦИИ ВЫНЕСТИ ОТДЕЛЬНО В КАЖДЫЙ ИЗ СЕРВИСОВ
 async def get_session() -> AsyncIterator[AsyncSession]:
     async with SessionFactory() as session:
         try:
