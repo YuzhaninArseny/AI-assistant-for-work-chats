@@ -5,7 +5,7 @@ from typing import Iterable, Annotated
 from fastapi import Depends, FastAPI
 from sqlmodel import select, Session, desc, create_engine, SQLModel
 
-from message import Message
+from shared.models.messages import Message
 
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")

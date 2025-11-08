@@ -35,8 +35,13 @@ class MessageRepository:
         ) for db_message in db_messages]
         return result_list
 
-    async def get_chat_messages(self, chat_id: int) -> list[TelegramMessage]:
-        query = await self._session.scalars(select(Message).where(Message.chat_id == chat_id))
+    async def get_chat_messages(self, chat_id: int, limit: int) -> list[TelegramMessage]:
+        query = await self._session.scalars(
+            select(Message)
+            .where(Message.chat_id == chat_id)
+            .order_by(Message.time_sent.desc())
+            .limit(limit)
+        )
         db_messages = query.all()
         if not db_messages:
             raise HTTPException(

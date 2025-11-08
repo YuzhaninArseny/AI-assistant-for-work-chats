@@ -1,14 +1,14 @@
-from fastapi import FastAPI, status, Query
+from fastapi import APIRouter, status, Query
 from fastapi.responses import JSONResponse
 from typing import List, Optional
-from search_engine import ChromaChatSearchEngine
-from shemas.DTO import TelegramMessage
+from shared.schemas.TelegramApiDtos import TelegramMessage
+from command_service_app.services.chroma.search_engine import ChromaChatSearchEngine
 
 engine = ChromaChatSearchEngine()
-app = FastAPI()
+router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
 
 
-@app.get('/relevant-messages')
+@router.get('/')
 def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[str] = Query(None)):
     try:
         relevant_messages = engine.search(key_words)
@@ -33,10 +33,7 @@ def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[s
         )
 
 
-
-# Для окончательного формирования ответа остается только в методе бота собрать из сообщений
-# md-ответ и все
-@app.post('/messages')
+@router.post('/messages')
 def add_messages(messages: List[TelegramMessage]):
     try:
         engine.add_chat_messages(messages)

@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from typing import List, Dict, Any
 import uuid
-from shemas.DTO import TelegramMessage
+from shared.schemas.TelegramApiDtos import TelegramMessage
 
 # Потестить работу и качество rag-системы на бенчмарках
 
@@ -72,10 +72,6 @@ class ChromaChatSearchEngine:
             )
             raise e
 
-    # Уточнить, какого формата должен быть результат команды
-    # поиска релевантных сообщений по ключевым словам:
-    # 1) Можно просто скинуть ссылки на сообщения, разделенных по каждому ключевому слову
-    # 2) Или все ключевые слова объединены в одну тему и можно просто тупо скинуть ссылки на сообщения
     def search(self, key_words: List[str], top_k: int = 10000) \
             -> Dict[str, Dict[str, Dict[str, List[Any]]]]:
         """

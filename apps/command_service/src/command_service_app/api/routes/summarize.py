@@ -1,20 +1,29 @@
-from fastapi import FastAPI
-from summarization_model import SummarizationModel
-from db_client import load_db_lifespan, DbClientDep
+from fastapi import APIRouter
+from command_service_app.services.summarization.summarization_model import SummarizationModel
+from command_service_app.repositories.db_client import DbClientDep
 
 model = SummarizationModel()
-app = FastAPI(lifespan=load_db_lifespan)
+router = APIRouter(prefix="/summarize", tags=["summarization"])
 
-
-@app.get("/summarize")
+@router.get("/")
 def get_messages(dbclient: DbClientDep, chat_id: int, limit: int | None) -> str:
     messages = dbclient.get_chat_messages(chat_id, limit)
     if len(messages) == 0:
         return 'В чате нет активности'
 
-    # уточнить у эксперта, как сделать этот промпт лучше
-    text = " ".join([msg.content for msg in messages])
-    summarize_text = model.summarize(text)
+    prompt = f"""
+        Суммаризируй следующие Telegram сообщения, выделив:
+
+            1. **Основные темы обсуждения** - какие вопросы поднимались
+            2. **Ключевые решения** - что было решено
+            3. **Важные моменты** - значимые идеи или информация
+            4. **Вопросы, требующие внимания** - что осталось нерешенным
+            5. **Общий тон дискуссии** - настроение участников
+        
+        Сообщения:
+            {" ".join([msg.content for msg in messages])}
+    """
+    summarize_text = model.summarize(prompt)
 
     return summarize_text
 
