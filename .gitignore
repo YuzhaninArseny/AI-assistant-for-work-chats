@@ -8,9 +8,9 @@ __pycache__/
 
 # Virtual environments
 venv/
-.env/
+.env
 saver/.env/
-.env.*
+.env.
 .venv/
 
 # Poetry / pipenv / pip cache
