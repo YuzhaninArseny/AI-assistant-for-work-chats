@@ -35,20 +35,11 @@ RUN --mount=type=cache,id=poetry-cache,target=/root/.cache/pypoetry \
 # ---- копируем исходники (перезапишутся томами в dev) ----
 COPY shared/src /app/shared/src
 COPY saver/src /app/saver/src
+
 # Финальный прогон, чтобы гарантированно создать editable links
 RUN --mount=type=cache,id=poetry-cache,target=/root/.cache/pypoetry \
     poetry -C /app/saver install --with dev --sync
 
-COPY alembic /app/alembic
-COPY alembic.ini /app/alembic.ini
-
-RUN printf '%s\n' \
-'#!/usr/bin/env sh' \
-'set -e' \
-'alembic -c /app upgrade head' \
-'exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
 # uvicorn попадёт в .venv (если указан в deps dev/main)
 ENV PATH="/app/saver/.venv/bin:$PATH"
 WORKDIR /app/saver
