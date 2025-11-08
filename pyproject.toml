@@ -18,7 +18,9 @@ command-service = { path = "apps/command_service", develop = true }
 shared = {path = "apps/shared", develop = true}
 bot-app = { path = "bot", develop = true }
 
-[tool.poetry.group.dev.dependencies]
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
 pytest = "^8.4"
 ruff = "^0.13"
 black = "^24.0"

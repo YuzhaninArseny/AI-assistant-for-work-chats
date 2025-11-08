@@ -71,11 +71,16 @@ services:
     ports:
       - "6677"
 
-#  summarizer:
-#    build: summarizer
-#    env_file: .env
+#  chroma:
+#    build:
+#      context:
+#        ./chroma
+#      dockerfile:
+#        ./Dockerfile
+#    container_name:
+#      chroma-service
 #    ports:
-#      - "1234:8080"
+#      ["8082:8080"]
 
 volumes:
   pgdata: {}

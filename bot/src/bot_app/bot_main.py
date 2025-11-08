@@ -6,6 +6,8 @@ import aiohttp
 from aiogram import Dispatcher, Bot
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeDefault
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from bot_app.routers import main_subrouter
 from bot_app.commands import draft, search, stats, summary, groups
