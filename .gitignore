@@ -15,8 +15,6 @@ saver/.env/
 .venv/
 
 # Poetry / pipenv / pip cache
-*.lock
-poetry.lock
 pip-selfcheck.json
 poetry_help.txt
 
