@@ -70,7 +70,7 @@ class Message(Base):
         UniqueConstraint('chat_id', 'message_id', name='uq_chat_msg'),
 
         # Индекс для полнотекстового поиска по TSVECTOR
-        Index("ix_messages_tsv", "tsv", postgresql_using="gin"),
+        # Index("ix_messages_tsv", "tsv", postgresql_using="gin"),
 
         # Триграммный индекс для поиска по опечаткам (ILIKE)
         Index(
@@ -104,5 +104,5 @@ class Message(Base):
         nullable=False
     )
 
-    tsv: Mapped[Optional[str]] = mapped_column(TSVECTOR, nullable=True)
+    # tsv: Mapped[Optional[str]] = mapped_column(TSVECTOR, nullable=True)
 
