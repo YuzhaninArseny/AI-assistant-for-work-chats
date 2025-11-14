@@ -16,10 +16,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: pip install poetry
       - name: Install dependencies
         run: poetry install
-      - uses: pavelzw/pytest-action@v2
-        with:
-          emoji: false
-          verbose: false
-          job-summary: true
+      - name: Run tests
+        run: poetry run pytest

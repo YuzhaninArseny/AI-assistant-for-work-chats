@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from dotenv import find_dotenv
 from pydantic import computed_field, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
