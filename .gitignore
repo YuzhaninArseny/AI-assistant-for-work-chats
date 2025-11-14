@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -8,14 +9,12 @@ __pycache__/
 
 # Virtual environments
 venv/
-.env/
+.env
 saver/.env/
-.env.*
+.env.
 .venv/
 
 # Poetry / pipenv / pip cache
-*.lock
-poetry.lock
 pip-selfcheck.json
 poetry_help.txt
 
@@ -50,3 +49,6 @@ data
 .vscode
 
 *.env
+=======
+.venv
+>>>>>>> Stashed changes

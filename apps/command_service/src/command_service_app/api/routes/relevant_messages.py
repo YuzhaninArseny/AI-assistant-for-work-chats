@@ -1,0 +1,57 @@
+from fastapi import APIRouter, status, Query
+from fastapi.responses import JSONResponse
+from typing import List, Optional
+from shared.schemas.TelegramApiDtos import TelegramMessage
+from command_service_app.services.chroma.search_engine import ChromaChatSearchEngine
+
+engine = ChromaChatSearchEngine()
+router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
+
+
+@router.get('/')
+def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[str] = Query(None)):
+    try:
+        relevant_messages = engine.search(key_words)
+        if chat_id is not None:
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={f'{chat_id}': relevant_messages.get(chat_id)}
+            )
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=relevant_messages
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "Внутренняя ошибка сервера",
+                "error_code": "INTERNAL_SERVER_ERROR",
+                "details": str(e),
+            }
+        )
+
+
+@router.post('/messages')
+def add_messages(messages: List[TelegramMessage]):
+    try:
+        engine.add_chat_messages(messages)
+
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={
+                "status": "success",
+                "added_messages": len(messages)
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "Внутренняя ошибка сервера",
+                "error_code": "INTERNAL_SERVER_ERROR",
+                "details": str(e),
+            }
+        )

@@ -15,6 +15,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  migrate:
+    build:
+      context: ./apps
+      dockerfile: migrator/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
   saver:
     build:
       context:
@@ -59,11 +71,16 @@ services:
     ports:
       - "6677"
 
-#  summarizer:
-#    build: summarizer
-#    env_file: .env
+#  chroma:
+#    build:
+#      context:
+#        ./chroma
+#      dockerfile:
+#        ./Dockerfile
+#    container_name:
+#      chroma-service
 #    ports:
-#      - "1234:8080"
+#      ["8082:8080"]
 
 volumes:
   pgdata: {}
