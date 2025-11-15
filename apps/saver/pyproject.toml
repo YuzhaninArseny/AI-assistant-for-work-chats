@@ -20,11 +20,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 packages = [{ include = "saver_app", from = "src" }]
 
-[tool.poetry.dependencies]
-shared = { path = "../shared", develop = true }
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
-ruff = "^0.13.3"
-black = "^25.9.0"
-mypy = "^1.18.2"

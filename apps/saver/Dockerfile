@@ -13,9 +13,6 @@ COPY shared/poetry.lock     /app/shared/poetry.lock
 COPY saver/pyproject.toml /app/saver/pyproject.toml
 COPY saver/poetry.lock     /app/saver/poetry.lock
 
-# Важно: в saver зависимость на shared должна быть вида:
-#   shared = { path = "../shared", develop = true }
-# Тогда ниже создастся editable-ссылка на /app/shared
 RUN poetry -C /app/saver install --with dev --no-root --sync
 
 COPY shared/src /app/shared/src
