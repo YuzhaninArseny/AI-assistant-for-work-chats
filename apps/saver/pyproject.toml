@@ -19,6 +19,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 packages = [{ include = "saver_app", from = "src" }]
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.4.2"
