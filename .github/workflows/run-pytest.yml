@@ -18,6 +18,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry
         run: pip install poetry
+      - name: Refresh poetry lock
+        run: poetry lock
       - name: Install dependencies
         run: poetry install
       - name: Run tests
