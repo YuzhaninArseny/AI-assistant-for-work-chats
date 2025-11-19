@@ -8,7 +8,7 @@ from sqlmodel import select, Session, desc, create_engine, SQLModel
 from shared.models.messages import Message
 
 DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
+DB_PORT = os.getenv("DB_PORT") or "5432"
 DB_SCHEME = "postgresql"  # os.getenv("DB_SCHEME")
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_USER = os.getenv('DB_USER')

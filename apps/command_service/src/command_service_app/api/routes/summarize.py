@@ -10,7 +10,7 @@ logger = getLogger("summarizer")
 logger.setLevel(INFO)
 
 @router.get("/")
-def get_messages(dbclient: DbClientDep, chat_id: int, limit: int | None) -> str:
+def get_messages(dbclient: DbClientDep, chat_id: int, limit: int | None=None) -> str:
     messages = dbclient.get_chat_messages(chat_id, limit)
     logger.info(
         f"Summarizing chat {chat_id} from {messages[0].message_id} to {messages[-1].message_id} ({len(messages)} messages)")
