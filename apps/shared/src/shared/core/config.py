@@ -1,20 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from dotenv import find_dotenv
 from pydantic import computed_field, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# ЭТО полу-костыль, то есть два dotenv - внутри микросервиса и в репозитории. надо явно их обоих импортить и разделять
-env_path = find_dotenv(usecwd=True) or ".env"
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-    )
-
     # App
     APP_NAME: str = "telegram-chats-api"
     APP_ENV: str = "dev"

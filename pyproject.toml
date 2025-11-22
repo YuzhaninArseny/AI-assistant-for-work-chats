@@ -3,7 +3,7 @@ name = "repo-setup"
 version = "0.1.0"
 description = "Dev meta-project for monorepo"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["sqlmodel (>=0.0.27,<0.0.28)", "aiosqlite (>=0.21.0,<0.22.0)", "pytest-env (>=1.2.0,<2.0.0)", "fastapi (>=0.121.2,<0.122.0)", "httpx (>=0.28.1,<0.29.0)", "pydantic-settings (>=2.12.0,<3.0.0)"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0"]
@@ -18,10 +18,11 @@ command-service = { path = "apps/command_service", develop = true }
 shared = {path = "apps/shared", develop = true}
 bot-app = { path = "bot", develop = true }
 
-[build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.group.dev.dependencies]
 pytest = "^8.4"
-ruff = "^0.13"
-black = "^24.0"
-mypy = "^1.8"
+
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "apps/saver/src"
+]

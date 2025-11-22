@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -49,6 +48,4 @@ data
 .vscode
 
 *.env
-=======
-.venv
->>>>>>> Stashed changes
+*.db
