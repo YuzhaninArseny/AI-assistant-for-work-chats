@@ -3,7 +3,6 @@ from sentence_transformers import SentenceTransformer
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from typing import List, Dict, Any
 import uuid
-from shared.schemas.TelegramApiDtos import TelegramMessage
 
 # Потестить работу и качество rag-системы на бенчмарках
 
@@ -35,7 +34,7 @@ class ChromaChatSearchEngine:
 
         return embeddings.tolist()
         
-    def add_chat_messages(self, messages: List[TelegramMessage]):
+    def add_chat_messages(self, messages: List[Dict]):
         """
         Добавление сообщений в векторную базу
         messages: список словарей с ключами 'text', 'sender', 'timestamp' и др.
@@ -48,14 +47,12 @@ class ChromaChatSearchEngine:
             metadatas = []
             ids = []
             for msg in messages:
-                if msg.text is None:
-                    continue
-                documents.append(msg.text)
+                documents.append(msg['text'])
                 metadatas.append({
-                    'message_id': str(msg.message_id),
-                    'chat_id': str(msg.chat.id),
-                    'link': f'{self.tg_url_prefix}/{msg.chat.id}/{msg.message_id}',
-                    'timestamp': msg.date,
+                    'message_id': str(msg['message_id']),
+                    'chat_id': str(msg['id']),
+                    'link': f'{self.tg_url_prefix}/{msg["id"]}/{msg["message_id"]}',
+                    'timestamp': msg['date'],
                 })
                 ids.append(str(uuid.uuid4()))
 

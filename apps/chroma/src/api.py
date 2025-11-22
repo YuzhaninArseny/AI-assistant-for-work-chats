@@ -1,14 +1,14 @@
-from fastapi import APIRouter, status, Query
+from typing import List, Optional, Dict
+from fastapi import FastAPI, status, Query
 from fastapi.responses import JSONResponse
-from typing import List, Optional
-from shared.schemas.TelegramApiDtos import TelegramMessage
-from command_service_app.services.chroma.search_engine import ChromaChatSearchEngine
+from search_engine import ChromaChatSearchEngine
+
 
 engine = ChromaChatSearchEngine()
-router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
+app = FastAPI()
 
 
-@router.get('/')
+@app.get('/relevant-messages')
 def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[str] = Query(None)):
     try:
         relevant_messages = engine.search(key_words)
@@ -33,23 +33,10 @@ def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[s
         )
 
 
-@router.post('/messages')
-def add_messages(messages: List[TelegramMessage]):
+@app.post('/messages')
+def add_messages(messages: List[Dict]):
     try:
-        tg_messages_to_dicts = []
-        for msg in messages:
-            if msg.text is None:
-                continue
-            tg_messages_to_dicts.append(
-                {
-                    'text': msg['text'],
-                    'message_id': str(msg.message_id),
-                    'chat_id': str(msg.chat.id),
-                    'timestamp': msg.date
-                }
-            )
-
-        engine.add_chat_messages(tg_messages_to_dicts)
+        engine.add_chat_messages(messages)
 
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,

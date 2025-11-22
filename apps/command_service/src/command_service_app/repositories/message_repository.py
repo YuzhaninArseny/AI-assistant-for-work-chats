@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
-from datetime import datetime
 from shared.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
 from shared.models.messages import Message
 
