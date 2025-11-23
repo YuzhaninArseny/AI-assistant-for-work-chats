@@ -1,16 +1,18 @@
-from fastapi import APIRouter, status, Query
+from typing import List, Optional, Dict
+from fastapi import FastAPI, status, Query
 from fastapi.responses import JSONResponse
-from typing import List, Optional
-from shared.models.request_models import RelevantMessagesRequest, AddingMessagesRequest
-from command_service_app.core.service_client import chroma_service_client
-
-router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
+from search_engine import ChromaChatSearchEngine
+from request_models import RelevantMessagesRequest, AddingMessagesRequest
 
 
-@router.post('/')
-async def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optional[str] = Query(None)):
+engine = ChromaChatSearchEngine()
+app = FastAPI()
+
+
+@app.post('/relevant-messages')
+def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optional[str] = Query(None)):
     try:
-        relevant_messages = await chroma_service_client.post('/relevant-messages', json={'key_words': request.key_words})
+        relevant_messages = engine.search(request.key_words)
         if chat_id is not None:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
@@ -32,23 +34,10 @@ async def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optio
         )
 
 
-@router.post('/messages')
-async def add_messages(request: AddingMessagesRequest):
+@app.post('/messages')
+def add_messages(request: AddingMessagesRequest):
     try:
-        tg_messages_to_dicts = []
-        for msg in request.messages:
-            if msg.text is None:
-                continue
-            tg_messages_to_dicts.append(
-                {
-                    'text': msg['text'],
-                    'message_id': str(msg.message_id),
-                    'chat_id': str(msg.chat.id),
-                    'timestamp': msg.date
-                }
-            )
-
-        await chroma_service_client.post('/messages', json={'messages': tg_messages_to_dicts})
+        engine.add_chat_messages(request.messages)
 
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,

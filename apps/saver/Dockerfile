@@ -13,10 +13,10 @@ COPY shared/poetry.lock     /app/shared/poetry.lock
 COPY saver/pyproject.toml /app/saver/pyproject.toml
 COPY saver/poetry.lock     /app/saver/poetry.lock
 
-RUN poetry -C /app/saver install --with dev --no-root --sync
+RUN poetry -C /app/saver install --no-root --sync
 
 COPY shared/src /app/shared/src
-COPY saver/src /app/saver/src
+COPY . /app
 
 WORKDIR /app/saver
 
