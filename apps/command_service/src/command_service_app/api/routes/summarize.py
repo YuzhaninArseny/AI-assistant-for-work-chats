@@ -22,11 +22,12 @@ SummarizationModelDep = Annotated[ServiceClient, Depends(get_summarization_model
 async def get_messages(dbclient: DbClientDep, model_client: SummarizationModelDep,
                        chat_id: int, limit: int | None = None) -> str:
     messages = dbclient.get_chat_messages(chat_id, limit)
-    logger.info(
-        f"Summarizing chat {chat_id} from {messages[0].message_id} to {messages[-1].message_id} ({len(messages)} messages)")
     if len(messages) == 0:
+        logger.info(f"No messages to summarize in chat {chat_id}")
         return 'В чате нет активности'
 
+    logger.info(
+        f"Summarizing chat {chat_id} from {messages[0].message_id} to {messages[-1].message_id} ({len(messages)} messages)")
     prompt = f"""
         Суммаризируй следующие Telegram сообщения, выделив:
 
