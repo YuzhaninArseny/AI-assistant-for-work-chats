@@ -50,9 +50,9 @@ class ChromaChatSearchEngine:
                 documents.append(msg['text'])
                 metadatas.append({
                     'message_id': str(msg['message_id']),
-                    'chat_id': str(msg['id']),
-                    'link': f'{self.tg_url_prefix}/{msg["id"]}/{msg["message_id"]}',
-                    'timestamp': msg['date'],
+                    'chat_id': str(msg['chat_id']),
+                    'link': f'{self.tg_url_prefix}/{msg["chat_id"]}/{msg["message_id"]}',
+                    'timestamp': msg['timestamp'],
                 })
                 ids.append(str(uuid.uuid4()))
 
@@ -65,7 +65,7 @@ class ChromaChatSearchEngine:
         except Exception as e:
             print(
                 f'Произошла ошибка при сохранении сообщений в {self.collection.name}'
-                f'Error: {e}'
+                f'Error: {repr(e)}'
             )
             raise e
 
@@ -109,5 +109,5 @@ class ChromaChatSearchEngine:
             return grouped_results
 
         except Exception as e:
-            print(f"Ошибка при поиске по всем чатам: {e}")
+            print(f"Ошибка при поиске по всем чатам: {repr(e)}")
             return {}

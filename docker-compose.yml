@@ -32,7 +32,7 @@ services:
       context:
         ./apps
       dockerfile:
-        saver/Dockerfile
+        ./saver/Dockerfile
     container_name: saver_app
     depends_on:
       db:
@@ -71,16 +71,38 @@ services:
     ports:
       - "6677"
 
-#  chroma:
-#    build:
-#      context:
-#        ./chroma
-#      dockerfile:
-#        ./Dockerfile
-#    container_name:
-#      chroma-service
-#    ports:
-#      ["8082:8001"]
+  chroma:
+    build:
+      context:
+        ./apps/chroma
+      dockerfile:
+        ./Dockerfile
+    container_name:
+      chroma-service
+    ports:
+      ["8082:8082"]
+
+  summarizator:
+    build:
+      context:
+        ./apps/summarization
+      dockerfile:
+        ./Dockerfile
+    container_name:
+      summarizator
+    ports:
+      ["8083:8083"]
+
+  response-draft-generator:
+    build:
+      context:
+        ./apps/response_draft_generator
+      dockerfile:
+        ./Dockerfile
+    container_name:
+      response-draft-generator
+    ports:
+      ["8084:8084"]
 
 volumes:
   pgdata: {}

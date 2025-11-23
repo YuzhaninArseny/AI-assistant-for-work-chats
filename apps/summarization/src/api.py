@@ -1,15 +1,16 @@
 from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 from summarization_model import SummarizationModel
+from request_models import SummarizeRequest
 
 model = SummarizationModel()
 app = FastAPI()
 
 
-@app.get('/summarize')
-def summarize(prompt: str):
+@app.post('/summarize')
+def summarize(request: SummarizeRequest):
     try:
-        summarize_text = model.summarize(prompt)
+        summarize_text = model.summarize(request.prompt)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=summarize_text
@@ -19,3 +20,7 @@ def summarize(prompt: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=e
         )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "summarization"}

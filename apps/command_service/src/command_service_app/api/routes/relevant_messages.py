@@ -1,17 +1,16 @@
 from fastapi import APIRouter, status, Query
 from fastapi.responses import JSONResponse
 from typing import List, Optional
-from shared.schemas.TelegramApiDtos import TelegramMessage
-from command_service_app.services.chroma.search_engine import ChromaChatSearchEngine
+from shared.models.request_models import RelevantMessagesRequest, AddingMessagesRequest
+from command_service_app.core.service_client import chroma_service_client
 
-engine = ChromaChatSearchEngine()
 router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
 
 
-@router.get('/')
-def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[str] = Query(None)):
+@router.post('/')
+async def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optional[str] = Query(None)):
     try:
-        relevant_messages = engine.search(key_words)
+        relevant_messages = await chroma_service_client.post('/relevant-messages', json={'key_words': request.key_words})
         if chat_id is not None:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
@@ -28,16 +27,16 @@ def get_relevant_messages(key_words: List[str] = Query(...), chat_id: Optional[s
                 "status": "error",
                 "message": "Внутренняя ошибка сервера",
                 "error_code": "INTERNAL_SERVER_ERROR",
-                "details": str(e),
+                "details": repr(e),
             }
         )
 
 
 @router.post('/messages')
-def add_messages(messages: List[TelegramMessage]):
+async def add_messages(request: AddingMessagesRequest):
     try:
         tg_messages_to_dicts = []
-        for msg in messages:
+        for msg in request.messages:
             if msg.text is None:
                 continue
             tg_messages_to_dicts.append(
@@ -49,13 +48,13 @@ def add_messages(messages: List[TelegramMessage]):
                 }
             )
 
-        engine.add_chat_messages(tg_messages_to_dicts)
+        await chroma_service_client.post('/messages', json={'messages': tg_messages_to_dicts})
 
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content={
                 "status": "success",
-                "added_messages": len(messages)
+                "added_messages": len(request.messages)
             }
         )
     except Exception as e:
@@ -65,6 +64,6 @@ def add_messages(messages: List[TelegramMessage]):
                 "status": "error",
                 "message": "Внутренняя ошибка сервера",
                 "error_code": "INTERNAL_SERVER_ERROR",
-                "details": str(e),
+                "details": repr(e),
             }
         )

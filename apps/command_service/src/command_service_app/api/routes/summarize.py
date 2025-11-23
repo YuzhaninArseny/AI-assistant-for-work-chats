@@ -1,16 +1,15 @@
 from logging import getLogger, INFO
-
 from fastapi import APIRouter
-from command_service_app.services.summarization.summarization_model import SummarizationModel
 from command_service_app.repositories.db_client import DbClientDep
+from command_service_app.core.service_client import summarization_client
 
-model = SummarizationModel()
+
 router = APIRouter(prefix="/summarize", tags=["summarization"])
 logger = getLogger("summarizer")
 logger.setLevel(INFO)
 
 @router.get("/")
-def get_messages(dbclient: DbClientDep, chat_id: int, limit: int | None) -> str:
+async def get_messages(dbclient: DbClientDep, chat_id: int, limit: int | None) -> str:
     messages = dbclient.get_chat_messages(chat_id, limit)
     logger.info(
         f"Summarizing chat {chat_id} from {messages[0].message_id} to {messages[-1].message_id} ({len(messages)} messages)")
@@ -29,6 +28,6 @@ def get_messages(dbclient: DbClientDep, chat_id: int, limit: int | None) -> str:
         Сообщения:
             {" ".join([msg.content for msg in messages])}
     """
-    summarize_text = model.summarize(prompt)
+    summarize_text = await summarization_client.post("/summarize", json={"prompt": prompt})
     logger.info(f"Summary for {chat_id} ready ({len(messages)} messages)")
     return summarize_text

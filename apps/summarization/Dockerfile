@@ -4,19 +4,23 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    PYTHONPATH="/app/summarization/src"
+    POETRY_VERSION=2.2.1
 
 WORKDIR /app
 
-RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
-    pip install "poetry==2.2.1"
+RUN pip install "poetry==${POETRY_VERSION}"
 
-ENV PATH="/app/command_service/.venv/bin:$PATH"
+COPY pyproject.toml poetry.lock* ./
 
-WORKDIR /app/summarization
+RUN poetry install --no-root
 
-COPY summarization/src /app/summarization/src
+COPY . /app
 
-CMD ["uvicorn", "summarization.api:app", \
-     "--host", "0.0.0.0", "--port", "8001", \
-     "--reload", "--reload-dir", "/app/summarization/src"]
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app/src"
+
+EXPOSE 8083
+
+CMD ["uvicorn", "api:app", \
+     "--host", "0.0.0.0", "--port", "8083", \
+     "--reload", "--reload-dir", "/app/src"]

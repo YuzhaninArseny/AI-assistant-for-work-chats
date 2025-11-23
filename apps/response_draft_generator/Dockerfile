@@ -4,19 +4,23 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    PYTHONPATH="/app/response_draft_generator/src"
+    POETRY_VERSION=2.2.1
 
 WORKDIR /app
 
-RUN --mount=type=cache,id=pip-cache,target=/root/.cache/pip \
-    pip install "poetry==2.2.1"
+RUN pip install "poetry==${POETRY_VERSION}"
 
-ENV PATH="/app/response_draft_generator/.venv/bin:$PATH"
+COPY pyproject.toml poetry.lock* ./
 
-WORKDIR /app/responce_draft_generator
+RUN poetry install --no-root
 
-COPY responce_draft_generator/src /app/responce_draft_generator/src
+COPY . /app
 
-CMD ["uvicorn", "response_draft_generator.api:app", \
-     "--host", "0.0.0.0", "--port", "8001", \
-     "--reload", "--reload-dir", "/app/response_draft_generator/src"]
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app/src"
+
+EXPOSE 8084
+
+CMD ["uvicorn", "api:app", \
+     "--host", "0.0.0.0", "--port", "8084", \
+     "--reload", "--reload-dir", "/app/src"]
