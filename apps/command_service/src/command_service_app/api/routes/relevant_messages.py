@@ -1,16 +1,26 @@
-from fastapi import APIRouter, status, Query
+from typing import Optional, Annotated
+
+from fastapi import APIRouter, status, Query, Depends
 from fastapi.responses import JSONResponse
-from typing import List, Optional
+
+from command_service_app.core.service_client import chroma_service_client, ServiceClient
 from shared.models.request_models import RelevantMessagesRequest, AddingMessagesRequest
-from command_service_app.core.service_client import chroma_service_client
 
 router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
 
 
+def get_chroma_client():
+    return chroma_service_client
+
+
+ChromaClientDep = Annotated[ServiceClient, Depends(get_chroma_client)]
+
+
 @router.post('/')
-async def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optional[str] = Query(None)):
+async def get_relevant_messages(request: RelevantMessagesRequest, chroma_client: ChromaClientDep,
+                                chat_id: Optional[int] = Query(None)):
     try:
-        relevant_messages = await chroma_service_client.post('/relevant-messages', json={'key_words': request.key_words})
+        relevant_messages = await chroma_client.post('/relevant-messages', json={'key_words': request.key_words})
         if chat_id is not None:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
@@ -33,7 +43,7 @@ async def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optio
 
 
 @router.post('/messages')
-async def add_messages(request: AddingMessagesRequest):
+async def add_messages(request: AddingMessagesRequest, chroma_client: ChromaClientDep):
     try:
         tg_messages_to_dicts = []
         for msg in request.messages:
@@ -48,7 +58,7 @@ async def add_messages(request: AddingMessagesRequest):
                 }
             )
 
-        await chroma_service_client.post('/messages', json={'messages': tg_messages_to_dicts})
+        await chroma_client.post('/messages', json={'messages': tg_messages_to_dicts})
 
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
