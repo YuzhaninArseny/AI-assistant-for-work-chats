@@ -1,3 +1,5 @@
+import traceback
+from logging import getLogger, INFO
 from typing import Optional, Annotated
 
 from fastapi import APIRouter, status, Query, Depends
@@ -7,6 +9,9 @@ from command_service_app.core.service_client import chroma_service_client, Servi
 from shared.models.request_models import RelevantMessagesRequest, AddingMessagesRequest
 
 router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
+
+logger = getLogger("relevant-messages")
+logger.setLevel(INFO)
 
 
 def get_chroma_client():
@@ -31,6 +36,7 @@ async def get_relevant_messages(request: RelevantMessagesRequest, chroma_client:
             content=relevant_messages
         )
     except Exception as e:
+        logger.error(traceback.format_exc())
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
@@ -68,6 +74,7 @@ async def add_messages(request: AddingMessagesRequest, chroma_client: ChromaClie
             }
         )
     except Exception as e:
+        logger.error(traceback.format_exc())
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={

@@ -1,3 +1,5 @@
+import traceback
+from logging import getLogger, INFO
 from typing import Annotated
 
 from fastapi import APIRouter, status, Depends
@@ -7,6 +9,9 @@ from command_service_app.core.service_client import response_draft_generator_cli
 from command_service_app.repositories.db_client import DbClientDep
 
 router = APIRouter(prefix="/draft", tags=["draft"])
+
+logger = getLogger("draft")
+logger.setLevel(INFO)
 
 
 def get_draft_client():
@@ -42,6 +47,7 @@ async def draft(db_client: DbClientDep, chat_id: int, draft_client: DraftGenerat
             content=draft
         )
     except Exception as e:
+        logger.error(traceback.format_exc())
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
