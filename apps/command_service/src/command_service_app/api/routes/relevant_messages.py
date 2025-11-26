@@ -53,14 +53,14 @@ async def add_messages(request: AddingMessagesRequest, chroma_client: ChromaClie
     try:
         tg_messages_to_dicts = []
         for msg in request.messages:
-            if msg.text is None:
+            if msg['content'] is None:
                 continue
             tg_messages_to_dicts.append(
                 {
                     'text': msg['text'],
-                    'message_id': str(msg.message_id),
-                    'chat_id': str(msg.chat.id),
-                    'timestamp': msg.date
+                    'message_id': str(msg['message_id']),
+                    'chat_id': str(msg['chat']['id']),
+                    'timestamp': msg['time_sent']
                 }
             )
 
