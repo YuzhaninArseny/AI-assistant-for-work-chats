@@ -1,10 +1,10 @@
-import asyncio
 import logging
 
 from aiogram.types import Message
 from aiohttp import ClientSession
 
 base_url = "http://saver:8000"
+command_base_url = "http://command_app:8001"
 
 
 async def save_message(aios: ClientSession, message: Message):
@@ -38,16 +38,20 @@ async def save_message(aios: ClientSession, message: Message):
         logging.error(r.text)
 
 
-async def summarize(chat_id: int) -> str:
-    await asyncio.sleep(5)
-    return f"summarized text for chat {chat_id}"
+async def summarize(aios: ClientSession, chat_id: int) -> str:
+    return await aios.post(f"{command_base_url}/summarize", params={"chat+_id": chat_id})
 
 
-async def search(char_id: int, query: str) -> str:
-    await asyncio.sleep(3)
-    return f"search result for '{query}' in chat {char_id}"
+async def search(aios: ClientSession, chat_id: int, query: list[str]) -> str:
+    return await aios.post(
+        "/relevant-messages/",
+        params={"chat_id": chat_id},
+        json={"key_words": query}
+    )
 
 
-async def draft(chat_id: int) -> str:
-    await asyncio.sleep(5)
-    return f"draft text for chat {chat_id}"
+async def draft(aios: ClientSession, chat_id: int) -> str:
+    return await aios.post(
+        "/draft/",
+        params={"chat_id": chat_id},
+    )

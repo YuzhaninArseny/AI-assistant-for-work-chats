@@ -12,7 +12,7 @@ router = Router()
 
 
 @router.message(CommandStart(deep_link=True))
-async def start(message: Message, command: CommandObject):
+async def start(message: Message, command: CommandObject, aiohttp_session:ClientSession):
     try:
         group_id = int(command.args)
     except ValueError:
@@ -20,7 +20,7 @@ async def start(message: Message, command: CommandObject):
         return
 
     logging.info(f"Subscription request: {group_id}")
-    await subscribe_user(message.from_user.id, group_id)
+    await subscribe_user(aiohttp_session, message.from_user.id, group_id)
 
     # TODO: получать реальное название, а не айди
     group_name = command.args

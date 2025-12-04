@@ -1,4 +1,9 @@
+import logging
+
+from aiohttp import ClientSession
 from pydantic import BaseModel
+
+from bot_app.api.api import command_base_url
 
 
 class GroupInfo(BaseModel):
@@ -6,9 +11,13 @@ class GroupInfo(BaseModel):
     name: str
 
 
-async def subscribe_user(user_id: int, group_id: int):
-    # TODO: INSERT user INTO subscriptions
-    pass
+async def subscribe_user(aios: ClientSession, user_id: int, group_id: int):
+    resp = await aios.post(
+        f"{command_base_url}/groups/add-user",
+              params={"user_id": user_id, "group_id": group_id}
+    )
+    if resp.status != 200:
+        logging.error(resp.text)
 
 
 async def unsubscribe_user(user_id: int, group_id: int):
@@ -16,6 +25,12 @@ async def unsubscribe_user(user_id: int, group_id: int):
     pass
 
 
-async def get_user_groups(user_id: int) -> list[GroupInfo]:
-    # TODO: query db
-    return [GroupInfo(id=i, name=f"my cool group {i}") for i in range(12)]
+async def get_user_groups(aios: ClientSession, user_id: int) -> list[GroupInfo]:
+    resp = await aios.post(
+        f"{command_base_url}/groups/my",
+        params={"user_id": user_id}
+    )
+    if resp.status != 200:
+        logging.error(resp.text)
+
+    return [GroupInfo(id=group['id'], name=group['title']) for group in await resp.json()]

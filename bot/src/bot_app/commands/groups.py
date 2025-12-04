@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiohttp import ClientSession
 from magic_filter import F
 
 from bot_app.api.subscriptions import get_user_groups, unsubscribe_user
@@ -18,8 +19,8 @@ class GroupsCBDataFactory(CallbackData, prefix='groups'):
 
 
 @router.message(Command("groups"))
-async def add_group(message: Message):
-    groups = await get_user_groups(message.from_user.id)
+async def add_group(message: Message, aiohttp_session: ClientSession):
+    groups = await get_user_groups(aiohttp_session, message.from_user.id)
     if groups:
         buttons_markup = create_kb(groups, ACTION_VIEW_GROUP, GroupsCBDataFactory)
         await message.answer("Группы, на обновления в которых вы подписаны:", reply_markup=buttons_markup)
@@ -29,8 +30,8 @@ async def add_group(message: Message):
 
 
 @router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_PAGE))
-async def group_page_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory):
-    markup = create_kb(await get_user_groups(callback.message.from_user.id),
+async def group_page_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory, aiohttp_session: ClientSession):
+    markup = create_kb(await get_user_groups(aiohttp_session, callback.message.from_user.id),
                        ACTION_VIEW_GROUP,
                        GroupsCBDataFactory,
                        current_page=callback_data.payload)
