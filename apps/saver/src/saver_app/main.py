@@ -1,3 +1,4 @@
+import os
 from logging import getLogger, INFO
 from typing import Annotated
 
@@ -11,10 +12,11 @@ from shared.schemas.TelegramApiDtos import TelegramMessage
 logger = getLogger("saver")
 logger.setLevel(INFO)
 app = FastAPI()
+CHROMA_HOST = os.getenv("CHROMA_HOST") or "chroma:8082"
 
 
 def get_chroma_client():
-    return httpx.AsyncClient(base_url="http://chroma:8082")
+    return httpx.AsyncClient(base_url=f"http://{CHROMA_HOST}")
 
 
 ChromaClientDep = Annotated[httpx:AsyncClient, Depends(get_chroma_client)]

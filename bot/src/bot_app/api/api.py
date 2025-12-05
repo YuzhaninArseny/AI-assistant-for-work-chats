@@ -39,19 +39,22 @@ async def save_message(aios: ClientSession, message: Message):
 
 
 async def summarize(aios: ClientSession, chat_id: int) -> str:
-    return await aios.post(f"{command_base_url}/summarize", params={"chat+_id": chat_id})
+    resp = await aios.get(f"{command_base_url}/summarize/", params={"chat_id": chat_id})
+    if resp.status != 200:
+        return "Произошла ошибка"
+    return str(await resp.json())
 
 
 async def search(aios: ClientSession, chat_id: int, query: list[str]) -> str:
-    return await aios.post(
-        "/relevant-messages/",
-        params={"chat_id": chat_id},
-        json={"key_words": query}
-    )
+    resp = await aios.post(f"{command_base_url}/relevant-messages/", params={"chat_id": chat_id},
+                             json={"key_words": query})
+    if resp.status != 200:
+        return "Произошла ошибка"
+    return str(await resp.json())
 
 
 async def draft(aios: ClientSession, chat_id: int) -> str:
-    return await aios.post(
-        "/draft/",
-        params={"chat_id": chat_id},
-    )
+    resp = await aios.post(f"{command_base_url}/draft/", params={"chat_id": chat_id}, )
+    if resp.status != 200:
+        return "Произошла ошибка"
+    return str(await resp.json())

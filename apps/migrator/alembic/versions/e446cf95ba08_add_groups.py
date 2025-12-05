@@ -20,14 +20,14 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.create_table('group',
-                    sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
+                    sa.Column('id', sa.BIGINT(), autoincrement=True, nullable=False),
                     sa.Column('title', sa.VARCHAR(), autoincrement=False, nullable=False),
                     sa.PrimaryKeyConstraint('id', name=op.f('group_pkey'))
                     )
     op.create_table('groupmembership',
                     sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
-                    sa.Column('user_id', sa.INTEGER(), autoincrement=False, nullable=False),
-                    sa.Column('group_id', sa.INTEGER(), autoincrement=False, nullable=False),
+                    sa.Column('user_id', sa.BIGINT(), autoincrement=False, nullable=False),
+                    sa.Column('group_id', sa.BIGINT(), autoincrement=False, nullable=False),
                     sa.PrimaryKeyConstraint('id', name=op.f('groupmembership_pkey'))
                     )
 

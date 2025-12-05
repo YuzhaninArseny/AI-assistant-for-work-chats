@@ -6,7 +6,7 @@ from aiogram.types import Message, ChatMemberUpdated
 from aiohttp import ClientSession
 
 from bot_app.api.api import save_message
-from bot_app.api.subscriptions import subscribe_user
+from bot_app.api.subscriptions import subscribe_user, add_bot
 
 router = Router()
 
@@ -41,8 +41,8 @@ async def msg(message: Message, aiohttp_session: ClientSession):
 
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
-async def bot_added(event: ChatMemberUpdated, bot: Bot):
-    # TODO: запрос на бэкэнд
+async def bot_added(event: ChatMemberUpdated, bot: Bot, aiohttp_session: ClientSession):
+    await add_bot(aiohttp_session, {"id":event.chat.id, "title": event.chat.title})
     logging.info(f"Bot added to {event.chat.type} {event.chat.id}")
     await event.answer(f"Теперь для этой группы можно делать краткие сводки с помощью бота.\n\n"
                        f"[Ссылка для добавления в бота](https://t.me/workchat_assistant_bot?start={event.chat.id})", parse_mode='markdown')

@@ -36,7 +36,7 @@ class DbClient:
         self.session = session
 
     def get_chat_messages(self, chat_id: int, limit: int | None = None) -> Iterable[Message]:
-        query = select(Message).where(Message.chat_id == chat_id).order_by(desc(Message.time_sent))
+        query = select(Message).where(Message.chat_id == chat_id, Message.content != None).order_by(desc(Message.time_sent))
         if limit is not None:
             query = query.limit(limit)
 

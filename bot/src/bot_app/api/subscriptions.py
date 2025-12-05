@@ -19,6 +19,15 @@ async def subscribe_user(aios: ClientSession, user_id: int, group_id: int):
     if resp.status != 200:
         logging.error(resp.text)
 
+async def add_bot(aios: ClientSession, group: dict):
+    resp = await aios.post(
+        f"{command_base_url}/groups/add-bot",
+              json=group
+    )
+    if resp.status != 200:
+        logging.error(resp.text)
+
+
 
 async def unsubscribe_user(user_id: int, group_id: int):
     # TODO: DELETE user FROM subscriptions
@@ -26,7 +35,7 @@ async def unsubscribe_user(user_id: int, group_id: int):
 
 
 async def get_user_groups(aios: ClientSession, user_id: int) -> list[GroupInfo]:
-    resp = await aios.post(
+    resp = await aios.get(
         f"{command_base_url}/groups/my",
         params={"user_id": user_id}
     )
