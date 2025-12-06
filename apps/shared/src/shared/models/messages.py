@@ -89,6 +89,7 @@ class Message(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, index=True)
     chat_id: Mapped[int] = mapped_column(BigInteger, index=True)
     message_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    chat_title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     username: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
