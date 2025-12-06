@@ -84,7 +84,7 @@ def test_saves_to_db(db_setup, client, chromadb):
     data = response.json()
 
     assert response.status_code == 201
-    assert data == message.model_dump()
+    assert data == message.model_dump(by_alias=True)
 
 
 def test_saves_to_chroma(db_setup, client, chromadb):

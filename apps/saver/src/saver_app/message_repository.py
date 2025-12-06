@@ -34,6 +34,7 @@ class MessageRepository:
             chat=TelegramChat(id=db_message.chat_id,
                               title=db_message.chat_title),
             date=int(db_message.time_sent.timestamp()),
+            text=db_message.content,
             from_ = TelegramUser(
                     id=db_message.user_id,
                     username=db_message.username
