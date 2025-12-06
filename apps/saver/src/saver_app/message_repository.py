@@ -35,11 +35,11 @@ class MessageRepository:
                               title=db_message.chat_title),
             date=int(db_message.time_sent.timestamp()),
             text=db_message.content,
-            from_ = TelegramUser(
+            from_=TelegramUser(
                     id=db_message.user_id,
                     username=db_message.username
                 )
-        ).model_dump()
+        )
 
 
 def __get_repo(session: Annotated[AsyncSession, Depends(get_session)]):
