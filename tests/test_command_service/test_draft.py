@@ -53,27 +53,28 @@ def add_test_messages(session, chat_id):
         time_sent=datetime.datetime(year=2025, month=1, day=1),
         user_id=987,
         username="admin",
-        content=f"msg content"
+        content=f"msg content",
+        chat_title="chat title",
     )
     session.add(msg)
     session.commit()
 
 
-# @pytest.mark.parametrize("with_messages", [False, True])
-# def test_draft(deps_setup, with_messages):
-#     client = TestClient(app)
-#     db_session = app.dependency_overrides[get_session]()
-#     if with_messages:
-#         add_test_messages(db_session, 123)
-#
-#     response = client.get(
-#         "/draft/",
-#         params={"chat_id": 123}
-#     )
-#
-#     data = response.json()
-#     assert response.status_code == 200
-#     if with_messages:
-#         assert data == 'это фейковый текст драфта'
-#     else:
-#         assert data == "Невозможно составить черновик ответа - вопросов не обнаружено"
+@pytest.mark.parametrize("with_messages", [False, True])
+def test_draft(deps_setup, with_messages):
+    client = TestClient(app)
+    db_session = app.dependency_overrides[get_session]()
+    if with_messages:
+        add_test_messages(db_session, 123)
+
+    response = client.get(
+        "/draft/",
+        params={"chat_id": 123}
+    )
+
+    data = response.json()
+    assert response.status_code == 200
+    if with_messages:
+        assert data == 'это фейковый текст драфта'
+    else:
+        assert data == "Невозможно составить черновик ответа - вопросов не обнаружено"
