@@ -35,6 +35,10 @@ class Message(Base):
       В паре `(chat_id, message_id)` должен быть уникален.
       *Обязательное поле.*
 
+    - **chat_title (str | None)** — название чата, в котором было отправлено сообщение.
+      Соответствует `chat.title` в Telegram API.
+      *Обязательное поле.*
+
     - **content (str | None)** — текстовое содержимое сообщения.
       Может быть `NULL`, если сообщение служебное (например, «пользователь вступил в группу»).
       *Необязательное поле.*
@@ -89,6 +93,7 @@ class Message(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, index=True)
     chat_id: Mapped[int] = mapped_column(BigInteger, index=True)
     message_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    chat_title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     username: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
