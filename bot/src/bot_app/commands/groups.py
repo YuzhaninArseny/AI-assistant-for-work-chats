@@ -52,10 +52,13 @@ async def group_view_cb(callback: CallbackQuery, callback_data: GroupsCBDataFact
 
 
 @router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_UNSUBSCRIBE))
-async def group_unsub_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory):
+async def group_unsub_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory, aiohttp_session: ClientSession):
     # TODO: error handling
-    await unsubscribe_user(callback.from_user.id, callback_data.payload)
-    await callback.message.answer(f"Вы отписаны от группы")
+    success = await unsubscribe_user(aiohttp_session, callback.from_user.id, callback_data.payload)
+    if success:
+        await callback.message.answer(f"Вы отписаны от группы")
+    else:
+        await callback.message.answer(f"Произошла ошибка")
     await callback.answer()
 
 

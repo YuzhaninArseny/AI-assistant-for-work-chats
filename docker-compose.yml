@@ -104,6 +104,8 @@ services:
     ports:
       ["8084:8084"]
   ai_testing:
+    profiles:
+      - noai
     build: apps/ai_testing_model
     container_name: aitest
 volumes:

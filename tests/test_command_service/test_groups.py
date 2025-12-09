@@ -90,6 +90,38 @@ def test_adduser(deps_setup):
     assert members[0].group_id == 987
 
 
+def test_remove_user_ok(deps_setup):
+    client = TestClient(app)
+    session: Session = app.dependency_overrides[get_session]()
+    add_groups(session)
+    session.add(GroupMembership(user_id=123, group_id=987))
+    session.commit()
+
+    response = client.post(
+        "/groups/remove-user",
+        params={"user_id": 123, "group_id": 987}
+    )
+    assert response.status_code == 200
+    members = session.exec(select(GroupMembership)).all()
+    assert len(members) == 0
+
+
+def test_remove_user_wrong(deps_setup):
+    client = TestClient(app)
+    session: Session = app.dependency_overrides[get_session]()
+    add_groups(session)
+    session.add(GroupMembership(user_id=123, group_id=987))
+    session.commit()
+
+    response = client.post(
+        "/groups/remove-user",
+        params={"user_id": 123, "group_id": 999}
+    )
+    assert response.status_code == 400
+    members = session.exec(select(GroupMembership)).all()
+    assert len(members) == 1
+
+
 def test_get_groups_ok(deps_setup):
     client = TestClient(app)
     session: Session = app.dependency_overrides[get_session]()
