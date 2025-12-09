@@ -23,6 +23,7 @@ class MessageRepository:
             content=message.text,
             username=message.from_.username,
             time_sent=datetime.fromtimestamp(message.date),
+            chat_title=message.chat.title
         )
 
         self._session.add(db_message)
@@ -30,14 +31,14 @@ class MessageRepository:
         await self._session.refresh(db_message)
         return TelegramMessage(
             message_id=db_message.message_id,
-            chat=TelegramChat(id=db_message.chat_id),
+            chat=TelegramChat(id=db_message.chat_id,
+                              title=db_message.chat_title),
             date=int(db_message.time_sent.timestamp()),
-            **{
-                "from": TelegramUser(
+            text=db_message.content,
+            from_=TelegramUser(
                     id=db_message.user_id,
                     username=db_message.username
                 )
-            }
         )
 
 

@@ -29,7 +29,8 @@ class FakeDbClient:
                 time_sent=datetime.datetime(year=2025, month=1, day=1),
                 user_id=987,
                 username="admin",
-                content=f"msg {i}"
+                content=f"msg {i}",
+                chat_title="test"
             )
             for i in range(limit or 10)
         ]
