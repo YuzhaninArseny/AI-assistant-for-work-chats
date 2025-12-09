@@ -26,8 +26,6 @@ ChromaClientDep = Annotated[httpx:AsyncClient, Depends(get_chroma_client)]
 async def receive_message(message: TelegramMessage, repo: MessagesRepoDep, chroma: ChromaClientDep):
     logger.info(f"Saving message {message.message_id}")
     message_ = await repo.add(message)
-    print("BIBA")
-
     await chroma.post("/messages", json={"messages": [message.model_dump()]})
     return message_
 

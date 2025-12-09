@@ -51,9 +51,6 @@ fake_chat_messages = {
 class FakeChroma:
     async def post(self, a, json):
         assert a == "/relevant-messages"
-        print(a)
-        print(json)
-        print(fake_chat_messages)
         return fake_chat_messages
 
 
@@ -89,7 +86,6 @@ def test_search(deps_setup):
     )
 
     data = response.json()
-    print(data)
     assert response.status_code == 200
 
     assert len(data) == 2
@@ -115,7 +111,6 @@ def test_search_for_chat(deps_setup, chat_id):
         )
 
         data = response.json()
-        print(data)
         assert response.status_code == 200
 
         assert len(data) == 1

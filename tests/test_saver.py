@@ -17,7 +17,6 @@ class FakeChromaServiceClient:
         self.documents = []
 
     async def post(self, url: str, json: dict):
-        print("ABOBA")
         assert url in {"/messages", "/messages/"}
 
         for msg in json['messages']:

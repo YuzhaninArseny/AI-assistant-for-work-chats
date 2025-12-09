@@ -11,7 +11,6 @@ class ServiceClient:
     async def post(self, endpoint: str, **kwargs) -> Any:
         async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout) as client:
             response = await client.post(endpoint, **kwargs)
-            print(response.text)
             response.raise_for_status()
             return response.json()
 
