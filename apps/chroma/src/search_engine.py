@@ -1,20 +1,26 @@
 from chromadb import Client
 from sentence_transformers import SentenceTransformer
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import uuid
 
-# Потестить работу и качество rag-системы на бенчмарках
 
 class ChromaChatSearchEngine:
     def __init__(
             self,
             collection_name="chat_messages",
-            model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-            ):
+            model_name="cointegrated/rubert-tiny2",
+            similarity_threshold_lower: float = 0.9,
+            similarity_threshold_upper: float = 0.65
+    ):
+        assert 0 <= similarity_threshold_lower <= 1
+        assert 0 <= similarity_threshold_upper <= 1
+
         self.model = SentenceTransformer(model_name)
         self.tg_url_prefix = 'https://t.me'
         self.client = Client()
+        self.similarity_threshold_lower = similarity_threshold_lower
+        self.similarity_threshold_upper = similarity_threshold_upper
         self.embedding_function = SentenceTransformerEmbeddingFunction(
             model_name=model_name
         )
@@ -33,7 +39,7 @@ class ChromaChatSearchEngine:
         )
 
         return embeddings.tolist()
-        
+
     def add_chat_messages(self, messages: List[Dict]):
         """
         Добавление сообщений в векторную базу
@@ -69,20 +75,33 @@ class ChromaChatSearchEngine:
             )
             raise e
 
-    def search(self, key_words: List[str], top_k: int = 10000) \
-            -> Dict[str, Dict[str, Dict[str, List[Any]]]]:
+    def search(
+            self,
+            key_words: List[str],
+            top_k: int = 10000
+    ) -> Dict[str, Dict[str, Dict[str, Any]]]:
         """
-        Поиск по всем чатам с группировкой результатов
+        Поиск по всем чатам с группировкой результатов и фильтрацией по порогу схожести
+
+        Args:
+            key_words: список ключевых слов для поиска
+            top_k: максимальное количество результатов для каждого запроса
+            similarity_threshold: порог схожести (0-1). Если None, используется значение по умолчанию
+
+        Returns:
+            Словарь с результатами, отфильтрованными по порогу схожести
         """
         try:
             results = self.collection.query(
                 query_texts=key_words,
-                n_results=top_k
+                n_results=top_k,
+                include=['documents', 'metadatas', 'distances']
             )
 
-            print(results)
+            print(f"Найдено результатов до фильтрации: {len(results['documents'][0]) if results['documents'] else 0}")
 
             grouped_results = {}
+
             for i, key_word in enumerate(key_words):
                 if not results['documents'] or not results['documents'][i]:
                     continue
@@ -92,6 +111,10 @@ class ChromaChatSearchEngine:
                         results['metadatas'][i],
                         results['distances'][i]
                 ):
+                    similarity = 1 - distance
+                    if self.similarity_threshold_lower < similarity or similarity > self.similarity_threshold_upper:
+                        continue
+
                     message_id = metadata.get('message_id')
                     chat_id = metadata['chat_id']
                     if not message_id:
@@ -100,12 +123,32 @@ class ChromaChatSearchEngine:
                     if chat_id not in grouped_results:
                         grouped_results[chat_id] = {}
 
+                    # Если сообщение уже есть, выбираем вариант с большей схожестью
                     if message_id not in grouped_results[chat_id]:
                         grouped_results[chat_id][message_id] = {
                             'text': doc,
+                            'similarity': similarity,
                             **metadata
                         }
+                    else:
+                        # Обновляем, если нашли более релевантный вариант
+                        current_similarity = grouped_results[chat_id][message_id].get('similarity', 0)
+                        if similarity > current_similarity:
+                            grouped_results[chat_id][message_id] = {
+                                'text': doc,
+                                'similarity': similarity,
+                                **metadata
+                            }
 
+            for chat_id in grouped_results:
+                sorted_messages = sorted(
+                    grouped_results[chat_id].items(),
+                    key=lambda x: x[1].get('similarity', 0),
+                    reverse=True
+                )[:top_k]
+                grouped_results[chat_id] = dict(sorted_messages)
+
+            print(f"Найдено результатов после фильтрации: {sum(len(msgs) for msgs in grouped_results.values())}")
             return grouped_results
 
         except Exception as e:

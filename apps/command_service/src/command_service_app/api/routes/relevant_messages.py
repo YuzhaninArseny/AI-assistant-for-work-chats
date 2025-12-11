@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 
 from command_service_app.core.service_client import chroma_service_client, ServiceClient
 from shared.models.request_models import RelevantMessagesRequest, AddingMessagesRequest
+from shared.schemas.TelegramApiDtos import TelegramMessage
+from command_service_app.core.service_client import chroma_service_client
 
 router = APIRouter(prefix="/relevant-messages", tags=["relevant-messages"])
 
@@ -49,18 +51,18 @@ async def get_relevant_messages(request: RelevantMessagesRequest, chroma_client:
 
 
 @router.post('/messages')
-async def add_messages(request: AddingMessagesRequest, chroma_client: ChromaClientDep):
+async def add_messages(messages: List[TelegramMessage]):
     try:
         tg_messages_to_dicts = []
-        for msg in request.messages:
-            if msg['content'] is None:
+        for msg in messages:
+            if msg.text is None:
                 continue
             tg_messages_to_dicts.append(
                 {
-                    'text': msg['text'],
-                    'message_id': str(msg['message_id']),
-                    'chat_id': str(msg['chat']['id']),
-                    'timestamp': msg['time_sent']
+                    'text': msg.text,
+                    'message_id': str(msg.message_id),
+                    'chat_id': str(msg.chat.id),
+                    'timestamp': msg.date
                 }
             )
 
@@ -70,7 +72,7 @@ async def add_messages(request: AddingMessagesRequest, chroma_client: ChromaClie
             status_code=status.HTTP_201_CREATED,
             content={
                 "status": "success",
-                "added_messages": len(request.messages)
+                "added_messages": len(messages)
             }
         )
     except Exception as e:
