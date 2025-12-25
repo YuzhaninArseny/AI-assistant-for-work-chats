@@ -73,14 +73,17 @@ services:
 
   chroma:
     build:
-      context:
-        ./apps/chroma
-      dockerfile:
-        ./Dockerfile
-    container_name:
-      chroma-service
+      context: ./apps/chroma
+      dockerfile: Dockerfile
+    environment:
+      - TRANSFORMERS_CACHE=/data/models
+      - HF_HOME=/data/models
+    volumes:
+      - ./chroma_data:/data/chromadb
+      - ./models_cache:/data/models
+    container_name: chroma-service
     ports:
-      ["8082:8082"]
+      - "8082:8082"
 
   summarizator:
     build:
@@ -90,6 +93,11 @@ services:
         ./Dockerfile
     container_name:
       summarizator
+    environment:
+      TRANSFORMERS_CACHE: /app/models
+      HF_HOME: /app/models
+    volumes:
+      - model_cache:/app/models
     ports:
       ["8083:8083"]
 
@@ -103,6 +111,12 @@ services:
       response-draft-generator
     ports:
       ["8084:8084"]
+    environment:
+      TRANSFORMERS_CACHE: /app/models
+      HF_HOME: /app/models
+    volumes:
+      - model_cache:/app/models
+
   ai_testing:
     profiles:
       - noai
@@ -110,3 +124,6 @@ services:
     container_name: aitest
 volumes:
   pgdata: {}
+  chroma_data: {}
+  models_cache: {}
+

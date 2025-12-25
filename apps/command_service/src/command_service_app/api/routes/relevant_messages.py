@@ -1,6 +1,6 @@
 import traceback
 from logging import getLogger, INFO
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 
 from fastapi import APIRouter, status, Query, Depends
 from fastapi.responses import JSONResponse
@@ -51,7 +51,7 @@ async def get_relevant_messages(request: RelevantMessagesRequest, chroma_client:
 
 
 @router.post('/messages')
-async def add_messages(messages: List[TelegramMessage]):
+async def add_messages(messages: List[TelegramMessage], chroma_client: ChromaClientDep):
     try:
         tg_messages_to_dicts = []
         for msg in messages:
