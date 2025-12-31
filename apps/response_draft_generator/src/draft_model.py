@@ -67,12 +67,13 @@ class PromptInjectionDetector:
 class ResponseDraftGenerator:
     def __init__(
             self,
-            model_name: str = "Qwen/Qwen2.5-3B-Instruct"
+            model_name: str = "Qwen/Qwen2.5-1.5B-Instruct"
     ):
         logger.info(f"Loading model: {model_name}")
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.detector = PromptInjectionDetector()
+
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name,
             use_fast=True,
@@ -82,9 +83,8 @@ class ResponseDraftGenerator:
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             device_map=device,
-            torch_dtype=torch.float32,
             trust_remote_code=True,
-            low_cpu_mem_usage=True
+            low_cpu_mem_usage=True,
         )
 
         self.model.eval()

@@ -97,7 +97,7 @@ services:
       TRANSFORMERS_CACHE: /app/models
       HF_HOME: /app/models
     volumes:
-      - model_cache:/app/models
+      - models_cache:/app/models
     ports:
       ["8083:8083"]
 
@@ -115,7 +115,7 @@ services:
       TRANSFORMERS_CACHE: /app/models
       HF_HOME: /app/models
     volumes:
-      - model_cache:/app/models
+      - models_cache:/app/models
 
   ai_testing:
     profiles:

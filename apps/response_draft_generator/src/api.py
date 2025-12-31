@@ -1,14 +1,14 @@
-from fastapi import APIRouter, status
+from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 from draft_model import ResponseDraftGenerator
 from request_models import ResponseDraftGeneratorRequest
 
 
 model = ResponseDraftGenerator()
-router = APIRouter(prefix="/draft", tags=["draft"])
+app = FastAPI()
 
 
-@router.post('/')
+@app.post('/draft')
 def draft(request: ResponseDraftGeneratorRequest):
     try:
         draft = model.generate(request.messages)
