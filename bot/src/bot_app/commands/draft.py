@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiohttp import ClientSession
 from magic_filter import F
-
+from aiogram.exceptions import TelegramBadRequest
 from bot_app.api.api import draft
 from bot_app.api.subscriptions import get_user_groups
 from bot_app.commands.groups_kb import ACTION_PAGE, create_kb, ACTION_EMPTY, get_group_name
@@ -37,7 +37,10 @@ async def group_search(callback: CallbackQuery, callback_data: DraftCBDataFactor
     await callback.answer()
     await callback.message.edit_text(f"Генерируем ответ для {group_name}. Результат пришлём новым сообщением")
     draft_ = await draft(aiohttp_session, group_id)
-    await callback.message.answer(draft_)
+    try:
+        await callback.message.answer(draft_, parse_mode='markdown')
+    except TelegramBadRequest:
+        await callback.message.answer(draft_, parse_mode)
     await callback.message.delete()
 
 

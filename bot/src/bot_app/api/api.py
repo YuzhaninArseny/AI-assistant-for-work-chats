@@ -75,7 +75,7 @@ async def search(aios: ClientSession, chat_id: int, query: list[str]) -> str:
 
 async def draft(aios: ClientSession, chat_id: int) -> str:
     try:
-        resp = await aios.post(f"{command_base_url}/draft/", params={"chat_id": chat_id}, )
+        resp = await aios.get(f"{command_base_url}/draft/", params={"chat_id": chat_id}, )
     except Exception as e:
         logging.error(f"Error searching in chat {chat_id}: {e}")
         return "Произошла ошибка"
