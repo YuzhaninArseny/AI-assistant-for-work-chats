@@ -62,10 +62,14 @@ async def search(aios: ClientSession, chat_id: int, query: list[str]) -> str:
         return "Произошла ошибка"
     if resp.status != 200:
         return "Произошла ошибка"
+
     found_messages: dict = (await resp.json())[str(chat_id)]
     if found_messages is None:
         return "Ничего не найдено"
-    result_string = '\n'.join([f"{msg['text']} ([ссылка]({msg['link']}))" for msg in found_messages.values()])
+    result_string = '\n'.join([
+        f"{i + 1}. {msg['text']} ([ссылка]({msg['link']}))"
+        for i, msg in enumerate(found_messages.values())
+    ])
     return f"**Результаты поиска**\n\n{result_string}"
 
 
