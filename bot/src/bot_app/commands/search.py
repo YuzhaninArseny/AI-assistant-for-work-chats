@@ -58,7 +58,7 @@ async def group_search(message: Message, state: FSMContext, bot: Bot, aiohttp_se
     await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=prompt_msg_id)
     sent = await message.answer(f"Выполняем поиск {group_id}. Результат пришлём новым сообщением")
     search_result = await search(aiohttp_session, group_id, message.text.split())
-    await message.answer(search_result)
+    await message.answer(search_result, parse_mode='markdown')
     await sent.delete()
 
 
