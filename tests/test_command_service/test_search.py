@@ -37,11 +37,11 @@ class FakeDbClient:
 
 
 fake_chat_messages = {
-    987: {
+    '987': {
         1: {"text": "Привет"},
         2: {"text": "Ого, привет, ты тоже пользуешься этим мессенджером"},
     },
-    654: {
+    '654': {
         3: {"text": "Здравствуй"},
         4: {"text": "Приветик"},
     }
@@ -101,7 +101,7 @@ def test_search(deps_setup):
 def test_search_for_chat(deps_setup, chat_id):
     client = TestClient(app)
 
-    chat_ids = [987, 654]
+    chat_ids = ['987', '654']
 
     for chat_id in chat_ids:
         response = client.post(
@@ -111,10 +111,11 @@ def test_search_for_chat(deps_setup, chat_id):
         )
 
         data = response.json()
+        print(data)
         assert response.status_code == 200
 
         assert len(data) == 1
-        assert len(data[str(chat_id)]) == 2
+        assert len(data[chat_id]) == 2
 
         for other_chat_id in chat_ids:
             if other_chat_id == chat_id:
@@ -122,4 +123,4 @@ def test_search_for_chat(deps_setup, chat_id):
             assert len(data.get(str(other_chat_id), [])) == 0
 
         for msg_id in fake_chat_messages[chat_id]:
-            assert data[str(chat_id)][str(msg_id)]['text'] == fake_chat_messages[chat_id][msg_id]['text']
+            assert data[chat_id][str(msg_id)]['text'] == fake_chat_messages[chat_id][msg_id]['text']
