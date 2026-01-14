@@ -1,7 +1,9 @@
 import datetime
 
 import pytest
+
 from fastapi.testclient import TestClient
+from httpx import Response
 from sqlmodel import Session, SQLModel, create_engine
 
 from apps.saver.src.saver_app.main import app, get_chroma_client
@@ -23,9 +25,10 @@ class FakeChromaServiceClient:
             self.documents.append({
                 'text': msg['text'],
                 'message_id': str(msg['message_id']),
-                'chat_id': str(msg['chat']['id']),
-                'timestamp': msg['date'],
+                'chat_id': str(msg['chat_id']),
+                'timestamp': msg['timestamp'],
             })
+            return Response(status_code=200)
 
 
 @pytest.fixture

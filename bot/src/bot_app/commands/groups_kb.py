@@ -1,5 +1,6 @@
 import math
 
+from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -12,13 +13,21 @@ ACTION_UNSUBSCRIBE = "unsub"
 ACTION_EMPTY = ""
 
 
-def create_kb(groups: list[GroupInfo], click_action, cb_factory, *, current_page=1):
+def get_group_name(group_id: int, page_groups: list[dict]) -> str:
+    for grp in page_groups:
+        if grp['id'] == group_id:
+            return grp['name']
+
+
+async def create_kb(groups: list[GroupInfo], click_action, cb_factory, state: FSMContext, *, current_page=1):
     page_count = math.ceil(len(groups) / GROUP_PAGE_SIZE)
 
     keyborad_builder = InlineKeyboardBuilder()
     buttons = []
     offset = GROUP_PAGE_SIZE * (current_page - 1)
     page_groups = groups[offset:offset + GROUP_PAGE_SIZE]
+    await state.update_data(page_groups=[{'id': grp.id, 'name': grp.name} for grp in page_groups])
+
     for group in page_groups:
         buttons.append(InlineKeyboardButton(
             text=group.name,
