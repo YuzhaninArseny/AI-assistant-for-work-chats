@@ -73,17 +73,6 @@ class Message(Base):
         # Уникальность сообщения в пределах чата
         UniqueConstraint('chat_id', 'message_id', name='uq_chat_msg'),
 
-        # Индекс для полнотекстового поиска по TSVECTOR
-        # Index("ix_messages_tsv", "tsv", postgresql_using="gin"),
-
-        # Триграммный индекс для поиска по опечаткам (ILIKE)
-        Index(
-            "ix_messages_content_trgm",
-            "content",
-            postgresql_using="gin",
-            postgresql_ops={"content": "gin_trgm_ops"}
-        ),
-
         # Индекс для сортировки сообщений по времени внутри чата
         Index("ix_messages_chat_time", "chat_id", "time_sent"),
     )
