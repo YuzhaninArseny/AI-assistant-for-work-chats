@@ -16,6 +16,8 @@ async def subscribe_user(aios: ClientSession, user_id: int, group_id: int):
         f"{command_base_url}/groups/add-user",
         params={"user_id": user_id, "group_id": group_id}
     )
+    if resp.status == 409:
+        return
     if resp.status != 200:
         logging.error(resp.text)
 
