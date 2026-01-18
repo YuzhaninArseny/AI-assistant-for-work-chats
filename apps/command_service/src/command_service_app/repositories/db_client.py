@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI
 from sqlmodel import select, Session, desc, create_engine, SQLModel
 
 from shared.models.messages import Message
+from shared.models.base import Base
 
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT") or "5432"
@@ -26,6 +27,7 @@ def get_session():
 @asynccontextmanager
 async def load_db_lifespan(app: FastAPI):
     SQLModel.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
     yield
 
 

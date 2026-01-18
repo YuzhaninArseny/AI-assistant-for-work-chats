@@ -16,7 +16,7 @@ def get_relevant_messages(request: RelevantMessagesRequest, chat_id: Optional[st
         if chat_id is not None:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content={f'{chat_id}': relevant_messages.get(chat_id)}
+                content={f'{chat_id}': relevant_messages.get(str(chat_id).replace('-100', ''))}
             )
         return JSONResponse(
             status_code=status.HTTP_200_OK,

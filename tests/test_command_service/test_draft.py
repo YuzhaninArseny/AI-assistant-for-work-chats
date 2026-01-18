@@ -16,7 +16,7 @@ class FakeDraftClient:
         assert url in {"/draft", "/draft/"}
         assert json['messages']
         for msg in json['messages']:
-            assert msg.get('content')
+            assert msg.content
 
         # ServiceClient возвращает обычные объекты, а не json-репрезентацию
         # поэтому это строка без кавычек внутри
@@ -73,6 +73,7 @@ def add_test_messages(session, chat_id):
 #     )
 #
 #     data = response.json()
+#     print(data)
 #     assert response.status_code == 200
 #     if with_messages:
 #         assert data == 'это фейковый текст драфта'

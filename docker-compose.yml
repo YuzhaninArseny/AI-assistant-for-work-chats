@@ -41,8 +41,7 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: ${DB_PORT:-5432}
-#    ports:
-#      - "8000:8000"
+
   command_service:
     build:
       context: ./apps
@@ -56,9 +55,6 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: ${DB_PORT:-5432}
-#    ports: [ "8001:8001" ]
-    #command: ["uvicorn","saver_app.main:saver_app","--host","0.0.0.0","--port","8000","--reload"]
-    #command: uvicorn saver.src.saver_app.main:app --host 0.0.0.0 --port 8000 --reload
 
   tgbot:
     build:
@@ -72,37 +68,44 @@ services:
       - "6677"
 
   chroma:
+    platform: linux/amd64
     build:
-      context:
-        ./apps/chroma
-      dockerfile:
-        ./Dockerfile
-    container_name:
-      chroma-service
+      context: ./apps/chroma
+      dockerfile: Dockerfile
+    environment:
+      - TRANSFORMERS_CACHE=/data/models
+      - HF_HOME=/data/models
+    volumes:
+      - ./chroma_data:/data/chromadb
+      - ./models_cache:/data/models
+    container_name: chroma-service
     ports:
-      ["8082:8082"]
+      - "8082:8082"
 
   summarizator:
-    build:
-      context:
-        ./apps/summarization
-      dockerfile:
-        ./Dockerfile
+    image: cowabangerrrrr/ai-assistant-for-work-chats-summarizator:latest
     container_name:
       summarizator
+    environment:
+      TRANSFORMERS_CACHE: /app/models
+      HF_HOME: /app/models
+    volumes:
+      - models_cache:/app/models
     ports:
       ["8083:8083"]
 
   response-draft-generator:
-    build:
-      context:
-        ./apps/response_draft_generator
-      dockerfile:
-        ./Dockerfile
+    image: cowabangerrrrr/response-draft-generator:3.0
     container_name:
       response-draft-generator
     ports:
       ["8084:8084"]
+    environment:
+      TRANSFORMERS_CACHE: /app/models
+      HF_HOME: /app/models
+    volumes:
+      - models_cache:/app/models
+
   ai_testing:
     profiles:
       - noai
@@ -110,3 +113,6 @@ services:
     container_name: aitest
 volumes:
   pgdata: {}
+  chroma_data: {}
+  models_cache: {}
+

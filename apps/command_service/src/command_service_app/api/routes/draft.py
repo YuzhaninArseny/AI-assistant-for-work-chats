@@ -30,18 +30,18 @@ async def draft(db_client: DbClientDep, chat_id: int, draft_client: DraftGenerat
 
         tg_messages_to_dicts = []
         for msg in messages:
-            if msg.text is None:
+            if msg.content is None:
                 continue
             tg_messages_to_dicts.append(
                 {
-                    'content': msg.text,
+                    'text': msg.content,
                     'message_id': str(msg.message_id),
-                    'chat_id': str(msg.chat.id),
-                    'timestamp': msg.date
+                    'chat_id': str(msg.chat_id),
+                    'timestamp': msg.time_sent.timestamp()
                 }
             )
 
-        draft = await draft_client.post('/draft', json={'messages': messages})
+        draft = await draft_client.post('/draft', json={'messages': tg_messages_to_dicts})
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=draft
