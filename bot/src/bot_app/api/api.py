@@ -82,3 +82,16 @@ async def draft(aios: ClientSession, chat_id: int) -> str:
     if resp.status != 200:
         return "Произошла ошибка"
     return str(await resp.json())
+
+
+async def get_stats(aios: ClientSession, chat_id: int) -> dict:
+    try:
+        resp = await aios.post(f"{command_base_url}/chats/{chat_id}/stats")
+    except Exception as e:
+        logging.error(f"Error fetching stats for chat {chat_id}: {e}")
+        raise
+
+    if resp.status != 200:
+        raise RuntimeError(f"Stats API returned {resp.status}")
+
+    return await resp.json()
