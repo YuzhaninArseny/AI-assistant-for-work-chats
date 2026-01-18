@@ -68,7 +68,10 @@ services:
       - "6677"
 
   chroma:
-    image: cowabangerrrrr/ai-assistant-for-work-chats-chroma:latest
+    platform: linux/amd64
+    build:
+      context: ./apps/chroma
+      dockerfile: Dockerfile
     environment:
       - TRANSFORMERS_CACHE=/data/models
       - HF_HOME=/data/models
@@ -92,7 +95,7 @@ services:
       ["8083:8083"]
 
   response-draft-generator:
-    image: cowabangerrrrr/response-draft-generator:2.0
+    image: cowabangerrrrr/response-draft-generator:3.0
     container_name:
       response-draft-generator
     ports:

@@ -12,3 +12,6 @@ class MessageService:
 
     async def get_chat_messages(self, chat_id: int, limit: int):
         return await self._messages.get_chat_messages(chat_id, limit)
+
+    async def get_chat_stats(self, chat_id: int):
+        return await self._messages.get_chat_stats(chat_id)

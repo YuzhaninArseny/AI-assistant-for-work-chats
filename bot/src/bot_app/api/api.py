@@ -1,7 +1,7 @@
 import logging
 
 from aiogram.types import Message
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 
 base_url = "http://saver:8000"
 command_base_url = "http://command_app:8001"
@@ -75,10 +75,26 @@ async def search(aios: ClientSession, chat_id: int, query: list[str]) -> str:
 
 async def draft(aios: ClientSession, chat_id: int) -> str:
     try:
-        resp = await aios.get(f"{command_base_url}/draft/", params={"chat_id": chat_id}, )
+        resp = await aios.get(f"{command_base_url}/draft/",
+            params={"chat_id": chat_id},
+            timeout=ClientTimeout(total=30000)
+         )
     except Exception as e:
-        logging.error(f"Error searching in chat {chat_id}: {e}")
+        logging.error(f"Draft creation error via chat {chat_id}: {e}")
         return "Произошла ошибка"
     if resp.status != 200:
         return "Произошла ошибка"
     return str(await resp.json())
+
+
+async def get_stats(aios: ClientSession, chat_id: int) -> dict:
+    try:
+        resp = await aios.get(f"{command_base_url}/chats/{chat_id}/stats")
+    except Exception as e:
+        logging.error(f"Error fetching stats for chat {chat_id}: {e}")
+        raise
+
+    if resp.status != 200:
+        raise RuntimeError(f"Stats API returned {resp.status}")
+
+    return await resp.json()

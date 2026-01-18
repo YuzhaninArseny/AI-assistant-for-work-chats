@@ -103,3 +103,47 @@ class TelegramChat(BaseModel):
 
     id: int = Field(..., description="ID чата (chat_id)")
     title: Optional[str] = None
+
+
+from pydantic import BaseModel
+from typing import List, Dict
+
+
+class TopUser(BaseModel):
+    """Информация о пользователе в рейтинге активности."""
+
+    user_id: int
+    """Идентификатор пользователя Telegram."""
+
+    username: str
+    """Имя пользователя без @."""
+
+    message_count: int
+    """Количество сообщений, отправленных пользователем за последние 14 дней."""
+
+
+class DailyUserActivity(BaseModel):
+    """Активность одного пользователя за один день."""
+
+    user_id: int
+    """Идентификатор пользователя Telegram."""
+
+    username: str
+    """Имя пользователя без @."""
+    
+    message_count: int
+    """Количество сообщений, отправленных этим пользователем в конкретный день."""
+
+
+class ChatStats(BaseModel):
+    """Статистика активности участников чата за последние 14 дней (в часовом поясе GMT+5)."""
+
+    top_users: List[TopUser]
+    """Список до 5 самых активных пользователей за период, отсортированный по убыванию активности."""
+
+    daily_activity: Dict[str, List[DailyUserActivity]]
+    """
+    Активность по дням. Ключ — дата в формате 'YYYY-MM-DD' (локальное время GMT+5).
+    Значение — список записей об активности пользователей в этот день.
+    Даже неактивные дни включаются с пустым списком.
+    """

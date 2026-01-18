@@ -13,7 +13,7 @@ class ChromaChatSearchEngine:
             bi_encoder_model="all-MiniLM-L6-v2",
             cross_encoder_model="cross-encoder/ms-marco-MiniLM-L-12-v2",
             top_n_rerank: int = 100,
-            similarity_threshold_lower: float = 0.5,
+            similarity_threshold_lower: float = 0.75,
             similarity_threshold_upper: float = 1.0,
             rerank_threshold: float = 0.85
     ):
@@ -60,13 +60,16 @@ class ChromaChatSearchEngine:
             metadatas.append({
                 'message_id': str(msg['message_id']),
                 'chat_id': str(msg['chat_id']),
-                'link': f'{self.tg_url_prefix}/{msg["chat_id"]}/{msg["message_id"]}',
+                'link': self._build_tg_link_for_message(msg),
                 'timestamp': msg['timestamp'],
             })
             ids.append(str(uuid.uuid4()))
 
         if documents:
             self.collection.add(documents=documents, metadatas=metadatas, ids=ids)
+
+    def _build_tg_link_for_message(self, msg: Dict) -> str:
+        return f'{self.tg_url_prefix}/c/{str(msg["chat_id"]).replace('-100', '')}/{msg["message_id"]}'
 
     def search(
             self,

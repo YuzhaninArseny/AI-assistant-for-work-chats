@@ -1,7 +1,11 @@
+from collections import defaultdict
+from datetime import datetime, timezone, timedelta
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
-from shared.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat
+from shared.schemas.TelegramApiDtos import TelegramMessage, TelegramUser, TelegramChat, ChatStats, TopUser, \
+    DailyUserActivity
 from shared.models.messages import Message
 
 
@@ -23,7 +27,7 @@ class MessageRepository:
             chat=TelegramChat(
                 id=db_message.chat_id,
             ),
-            date=db_message.time_sent.timestamp(),
+            date=int(db_message.time_sent.timestamp()),
             **{
                 "from": TelegramUser(
                     id=db_message.user_id,
@@ -34,7 +38,7 @@ class MessageRepository:
         ) for db_message in db_messages]
         return result_list
 
-    async def get_chat_messages(self, chat_id: int, limit: int) -> list[TelegramMessage]:
+    async def get_chat_messages(self, chat_id: int, limit: int = 1400) -> list[TelegramMessage]:
         query = await self._session.scalars(
             select(Message)
             .where(Message.chat_id == chat_id)
@@ -51,7 +55,7 @@ class MessageRepository:
             chat=TelegramChat(
                 id=db_message.chat_id,
             ),
-            date=db_message.time_sent.timestamp(),
+            date=int(db_message.time_sent.timestamp()),
             **{
                 "from": TelegramUser(
                     id=db_message.user_id,
@@ -60,3 +64,82 @@ class MessageRepository:
             }
         ) for db_message in db_messages]
         return result_list
+
+    async def get_chat_stats(self, chat_id: int) -> ChatStats:
+        tz_gmt5 = timezone(timedelta(hours=5))
+
+        # 1. Определяем "сегодня" в GMT+5 как дату (без времени)
+        today_gmt5 = datetime.now(tz_gmt5).date()
+        start_date_gmt5 = today_gmt5 - timedelta(days=13)
+        end_date_gmt5 = today_gmt5
+
+        # 2. Границы в UTC
+        start_datetime_gmt5 = datetime.combine(start_date_gmt5, datetime.min.time(), tzinfo=tz_gmt5)
+        end_datetime_gmt5 = datetime.combine(end_date_gmt5, datetime.max.time(), tzinfo=tz_gmt5)
+        start_utc_naive = start_datetime_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
+        end_utc_naive = end_datetime_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
+
+        # 3. Запрос: выбираем user_id, username, time_sent
+        stmt = select(Message.user_id, Message.username, Message.time_sent).where(
+            Message.chat_id == chat_id,
+            Message.time_sent >= start_utc_naive,
+            Message.time_sent <= end_utc_naive,
+            Message.is_service == False
+        )
+
+        result = await self._session.execute(stmt)
+        rows = result.fetchall()
+
+        # 4. Агрегация: используем user_id как ключ, но сохраняем username
+        # Поскольку username может меняться, будем брать последний ненулевой (или любой)
+        user_info: dict[int, str] = {}  # user_id -> username
+        top_counter: defaultdict[int, int] = defaultdict(int)
+        daily_activity: defaultdict[str, defaultdict[int, int]] = defaultdict(lambda: defaultdict(int))
+
+        for user_id, username, time_sent in rows:
+            if time_sent.tzinfo is None:
+                time_sent = time_sent.replace(tzinfo=timezone.utc)
+
+            local_time = time_sent.astimezone(tz_gmt5)
+            day_key = local_time.strftime("%Y-%m-%d")
+
+            # Сохраняем username (если есть)
+            if username is not None:
+                user_info[user_id] = username
+            elif user_id not in user_info:
+                user_info[user_id] = f"user_{user_id}"  # fallback, если username NULL
+
+            # Проверяем, попадает ли день в период (на всякий случай)
+            if start_date_gmt5.strftime("%Y-%m-%d") <= day_key <= end_date_gmt5.strftime("%Y-%m-%d"):
+                top_counter[user_id] += 1
+                daily_activity[day_key][user_id] += 1
+
+        # 5. Формируем топ-5
+        top_users = [
+            TopUser(
+                user_id=uid,
+                username=user_info.get(uid, f"user_{uid}"),
+                message_count=count
+            )
+            for uid, count in sorted(top_counter.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
+
+        # 6. Формируем daily_activity с username
+        all_days = [(start_date_gmt5 + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(14)]
+        full_daily_activity = {}
+        for day in all_days:
+            activities = []
+            for user_id, msg_count in daily_activity.get(day, {}).items():
+                username = user_info.get(user_id, f"user_{user_id}")
+                activities.append(DailyUserActivity(
+                    user_id=user_id,
+                    username=username,
+                    message_count=msg_count
+                ))
+            full_daily_activity[day] = activities
+
+        return ChatStats(
+            top_users=top_users,
+            daily_activity=full_daily_activity
+        )
+

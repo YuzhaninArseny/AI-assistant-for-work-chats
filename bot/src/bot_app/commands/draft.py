@@ -1,4 +1,5 @@
 from aiogram import Router
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
@@ -40,7 +41,7 @@ async def group_search(callback: CallbackQuery, callback_data: DraftCBDataFactor
     try:
         await callback.message.answer(draft_, parse_mode='markdown')
     except TelegramBadRequest:
-        await callback.message.answer(draft_, parse_mode)
+        await callback.message.answer(draft_)
     await callback.message.delete()
 
 
