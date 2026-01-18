@@ -3,8 +3,9 @@ from logging import getLogger, INFO
 from sqlalchemy.ext.asyncio import AsyncSession
 from command_service_app.services.message_service import MessageService
 from fastapi import APIRouter, Depends
-from shared.schemas.TelegramApiDtos import TelegramMessage
+from shared.schemas.TelegramApiDtos import TelegramMessage, ChatStats
 from shared.db.database import get_session
+from pydantic import BaseModel
 router = APIRouter(prefix="/chats", tags=["chats"])
 
 logger = getLogger("command")
@@ -14,3 +15,12 @@ logger.setLevel(INFO)
 async def get_messages(chat_id: int, session: AsyncSession = Depends(get_session)):
     logger.info(f"Reading chat messages: {chat_id}")
     return await MessageService(session).get_chat_messages(chat_id)
+
+
+
+
+
+@router.post("/{chat_id}/stats", response_model=ChatStats)
+async def get_stats(chat_id: int, session: AsyncSession = Depends(get_session)):
+    logger.info(f"Getting stats for chat: {chat_id}")
+    return await MessageService(session).get_chat_stats(chat_id)
