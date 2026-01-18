@@ -66,55 +66,64 @@ class MessageRepository:
         return result_list
 
     async def get_chat_stats(self, chat_id: int) -> ChatStats:
-        # Таймзона GMT+5
         tz_gmt5 = timezone(timedelta(hours=5))
-        now_gmt5 = datetime.now(tz_gmt5)
-        start_date_gmt5 = now_gmt5 - timedelta(days=14)
 
-        start_utc_naive = start_date_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
+        # 1. Определяем "сегодня" в GMT+5 как дату (без времени)
+        today_gmt5 = datetime.now(tz_gmt5).date()
 
-        # 1. Получаем все неслужебные сообщения за период
+        # 2. Первый день периода: 13 дней назад (чтобы всего было 14 дней: 0..13)
+        start_date_gmt5 = today_gmt5 - timedelta(days=13)
+        end_date_gmt5 = today_gmt5  # включительно
+
+        # 3. Для запроса в БД: нужно покрыть весь период с 00:00 первого дня по 23:59 последнего дня (в UTC)
+        start_datetime_gmt5 = datetime.combine(start_date_gmt5, datetime.min.time(), tzinfo=tz_gmt5)
+        end_datetime_gmt5 = datetime.combine(end_date_gmt5, datetime.max.time(), tzinfo=tz_gmt5)
+
+        start_utc_naive = start_datetime_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
+        end_utc_naive = end_datetime_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
+
+        # 4. Запрос сообщений за период
         stmt = select(Message.user_id, Message.time_sent).where(
-
-                Message.chat_id == chat_id,
-                Message.time_sent >= start_utc_naive,
-                Message.is_service == False
-
+            Message.chat_id == chat_id,
+            Message.time_sent >= start_utc_naive,
+            Message.time_sent <= end_utc_naive,  # ← важно: ограничить сверху
+            Message.is_service == False
         )
 
         result = await self._session.execute(stmt)
         rows = result.fetchall()
 
-        # 2. Агрегируем данные в Python (надёжнее для работы с часовым поясом)
+        # 5. Агрегация
         top_counter: defaultdict[int, int] = defaultdict(int)
         daily_activity: defaultdict[str, defaultdict[int, int]] = defaultdict(lambda: defaultdict(int))
 
         for user_id, time_sent in rows:
-            # time_sent — timezone-aware (UTC), если вы сохраняете его правильно
             if time_sent.tzinfo is None:
-                # Если вдруг naive — интерпретируем как UTC
                 time_sent = time_sent.replace(tzinfo=timezone.utc)
 
-            # Переводим в GMT+5 и извлекаем дату
             local_time = time_sent.astimezone(tz_gmt5)
             day_key = local_time.strftime("%Y-%m-%d")
 
-            top_counter[user_id] += 1
-            daily_activity[day_key][user_id] += 1
+            # Только если день входит в наш 14-дневный период
+            if start_date_gmt5.strftime("%Y-%m-%d") <= day_key <= end_date_gmt5.strftime("%Y-%m-%d"):
+                top_counter[user_id] += 1
+                daily_activity[day_key][user_id] += 1
 
-        # 3. Формируем top_users (топ-5)
-        top_users_sorted = sorted(top_counter.items(), key=lambda x: x[1], reverse=True)[:5]
-        top_users = [TopUser(user_id=uid, message_count=count) for uid, count in top_users_sorted]
+        # 6. Формируем топ-5
+        top_users = [
+            TopUser(user_id=uid, message_count=count)
+            for uid, count in sorted(top_counter.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
 
-        # 4. Гарантируем наличие всех 14 дней (включая пустые)
+        # 7. Гарантируем все 14 дней
         all_days = [(start_date_gmt5 + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(14)]
-        full_daily_activity: dict[str, list[DailyUserActivity]] = {}
-        for day in all_days:
-            activities = [
+        full_daily_activity = {
+            day: [
                 DailyUserActivity(user_id=uid, message_count=cnt)
                 for uid, cnt in daily_activity.get(day, {}).items()
             ]
-            full_daily_activity[day] = activities
+            for day in all_days
+        }
 
         return ChatStats(
             top_users=top_users,

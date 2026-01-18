@@ -17,10 +17,7 @@ async def get_messages(chat_id: int, session: AsyncSession = Depends(get_session
     return await MessageService(session).get_chat_messages(chat_id)
 
 
-
-
-
-@router.post("/{chat_id}/stats", response_model=ChatStats)
+@router.get("/{chat_id}/stats", response_model=ChatStats)
 async def get_stats(chat_id: int, session: AsyncSession = Depends(get_session)):
     logger.info(f"Getting stats for chat: {chat_id}")
     return await MessageService(session).get_chat_stats(chat_id)
