@@ -115,6 +115,9 @@ class TopUser(BaseModel):
     user_id: int
     """Идентификатор пользователя Telegram."""
 
+    username: str
+    """Имя пользователя без @."""
+
     message_count: int
     """Количество сообщений, отправленных пользователем за последние 14 дней."""
 
@@ -125,6 +128,9 @@ class DailyUserActivity(BaseModel):
     user_id: int
     """Идентификатор пользователя Telegram."""
 
+    username: str
+    """Имя пользователя без @."""
+    
     message_count: int
     """Количество сообщений, отправленных этим пользователем в конкретный день."""
 

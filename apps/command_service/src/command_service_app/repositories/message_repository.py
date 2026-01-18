@@ -70,60 +70,73 @@ class MessageRepository:
 
         # 1. Определяем "сегодня" в GMT+5 как дату (без времени)
         today_gmt5 = datetime.now(tz_gmt5).date()
-
-        # 2. Первый день периода: 13 дней назад (чтобы всего было 14 дней: 0..13)
         start_date_gmt5 = today_gmt5 - timedelta(days=13)
-        end_date_gmt5 = today_gmt5  # включительно
+        end_date_gmt5 = today_gmt5
 
-        # 3. Для запроса в БД: нужно покрыть весь период с 00:00 первого дня по 23:59 последнего дня (в UTC)
+        # 2. Границы в UTC
         start_datetime_gmt5 = datetime.combine(start_date_gmt5, datetime.min.time(), tzinfo=tz_gmt5)
         end_datetime_gmt5 = datetime.combine(end_date_gmt5, datetime.max.time(), tzinfo=tz_gmt5)
-
         start_utc_naive = start_datetime_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
         end_utc_naive = end_datetime_gmt5.astimezone(timezone.utc).replace(tzinfo=None)
 
-        # 4. Запрос сообщений за период
-        stmt = select(Message.user_id, Message.time_sent).where(
+        # 3. Запрос: выбираем user_id, username, time_sent
+        stmt = select(Message.user_id, Message.username, Message.time_sent).where(
             Message.chat_id == chat_id,
             Message.time_sent >= start_utc_naive,
-            Message.time_sent <= end_utc_naive,  # ← важно: ограничить сверху
+            Message.time_sent <= end_utc_naive,
             Message.is_service == False
         )
 
         result = await self._session.execute(stmt)
         rows = result.fetchall()
 
-        # 5. Агрегация
+        # 4. Агрегация: используем user_id как ключ, но сохраняем username
+        # Поскольку username может меняться, будем брать последний ненулевой (или любой)
+        user_info: dict[int, str] = {}  # user_id -> username
         top_counter: defaultdict[int, int] = defaultdict(int)
         daily_activity: defaultdict[str, defaultdict[int, int]] = defaultdict(lambda: defaultdict(int))
 
-        for user_id, time_sent in rows:
+        for user_id, username, time_sent in rows:
             if time_sent.tzinfo is None:
                 time_sent = time_sent.replace(tzinfo=timezone.utc)
 
             local_time = time_sent.astimezone(tz_gmt5)
             day_key = local_time.strftime("%Y-%m-%d")
 
-            # Только если день входит в наш 14-дневный период
+            # Сохраняем username (если есть)
+            if username is not None:
+                user_info[user_id] = username
+            elif user_id not in user_info:
+                user_info[user_id] = f"user_{user_id}"  # fallback, если username NULL
+
+            # Проверяем, попадает ли день в период (на всякий случай)
             if start_date_gmt5.strftime("%Y-%m-%d") <= day_key <= end_date_gmt5.strftime("%Y-%m-%d"):
                 top_counter[user_id] += 1
                 daily_activity[day_key][user_id] += 1
 
-        # 6. Формируем топ-5
+        # 5. Формируем топ-5
         top_users = [
-            TopUser(user_id=uid, message_count=count)
+            TopUser(
+                user_id=uid,
+                username=user_info.get(uid, f"user_{uid}"),
+                message_count=count
+            )
             for uid, count in sorted(top_counter.items(), key=lambda x: x[1], reverse=True)[:5]
         ]
 
-        # 7. Гарантируем все 14 дней
+        # 6. Формируем daily_activity с username
         all_days = [(start_date_gmt5 + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(14)]
-        full_daily_activity = {
-            day: [
-                DailyUserActivity(user_id=uid, message_count=cnt)
-                for uid, cnt in daily_activity.get(day, {}).items()
-            ]
-            for day in all_days
-        }
+        full_daily_activity = {}
+        for day in all_days:
+            activities = []
+            for user_id, msg_count in daily_activity.get(day, {}).items():
+                username = user_info.get(user_id, f"user_{user_id}")
+                activities.append(DailyUserActivity(
+                    user_id=user_id,
+                    username=username,
+                    message_count=msg_count
+                ))
+            full_daily_activity[day] = activities
 
         return ChatStats(
             top_users=top_users,

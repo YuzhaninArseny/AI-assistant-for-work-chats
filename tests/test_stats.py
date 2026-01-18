@@ -241,3 +241,41 @@ def test_stats_daily_activity_includes_empty_days(db_setup, chromadb):
     non_empty_days = [day for day, acts in stats.daily_activity.items() if acts]
     assert len(non_empty_days) == 1
     assert non_empty_days[0] == "2026-01-18"
+
+
+def test_stats_includes_username(db_setup, chromadb):
+    """Проверка, что username корректно сохраняется и возвращается в статистике."""
+    saver_client = TestClient(saver_app)
+    command_client = TestClient(command_app)
+
+    now_utc = datetime.datetime(2026, 1, 18, 12, 0, 0, tzinfo=datetime.timezone.utc)
+    ts = int(now_utc.timestamp())
+
+    # Создаём сообщение с username
+    msg = TelegramMessage(
+        message_id=1,
+        chat=TelegramChat(id=600, title="Test Chat"),
+        date=ts,
+        from_=TelegramUser(id=900, username="alice"),
+        text="Hello"
+    )
+    send_messages_to_saver(saver_client, chromadb, [msg])
+
+    response = command_client.get("/chats/600/stats")
+    assert response.status_code == 200
+    stats = ChatStats(**response.json())
+
+    # Проверяем top_users
+    assert len(stats.top_users) == 1
+    assert stats.top_users[0].user_id == 900
+    assert stats.top_users[0].username == "alice"
+    assert stats.top_users[0].message_count == 1
+
+    # Проверяем daily_activity
+    today = "2026-01-18"
+    assert today in stats.daily_activity
+    day_activities = stats.daily_activity[today]
+    assert len(day_activities) == 1
+    assert day_activities[0].user_id == 900
+    assert day_activities[0].username == "alice"
+    assert day_activities[0].message_count == 1

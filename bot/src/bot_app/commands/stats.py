@@ -30,12 +30,12 @@ def format_stats_report(chat_title: str, stats: dict) -> str:
     if top_users:
         lines.append("🏆 **Топ активных участников:**")
         for i, user in enumerate(top_users[:5], 1):
-            lines.append(f"{i}. ID `{user['user_id']}` — {user['message_count']} сообщений")
+            lines.append(f"{i}. ID `{user['username']}` — {user['message_count']} сообщений")
     else:
         lines.append("📭 Нет активности за последние 14 дней.")
 
     # === Активность по дням (последние 7 дней) ===
-    lines.append("\n📆 **Активность по дням (последние 7 дней):**")
+    lines.append("\n📆 **Активность по дням (последние 14 дней):**")
     daily = stats.get("daily_activity", {})
 
     # Сортируем дни по убыванию (свежие сверху)
@@ -43,15 +43,15 @@ def format_stats_report(chat_title: str, stats: dict) -> str:
 
     shown_days = 0
     for day, activities in sorted_days:
-        if shown_days >= 7:
+        if shown_days >= 14:
             break
         total = sum(act["message_count"] for act in activities)
         if total > 0:
             lines.append(f"\n`{day}` — всего **{total}** сообщений")
-            # Показываем топ-2 пользователя за день
-            top_day = sorted(activities, key=lambda x: x["message_count"], reverse=True)[:2]
+            # Показываем топ-5 пользователя за день
+            top_day = sorted(activities, key=lambda x: x["message_count"], reverse=True)[:5]
             for act in top_day:
-                lines.append(f"  • ID `{act['user_id']}`: {act['message_count']}")
+                lines.append(f"  • ID `{act['username']}`: {act['message_count']}")
             shown_days += 1
         else:
             # Пропускаем пустые дни, чтобы не засорять
