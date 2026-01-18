@@ -49,3 +49,8 @@ def my_groups(session: SessionDep, user_id: int):
     query = (select(Group).join(GroupMembership, GroupMembership.group_id == Group.id)
              .where(GroupMembership.user_id == user_id))
     return session.exec(query).all()
+
+
+@router.get('/{group_id}')
+def get_group_info(session: SessionDep, group_id: int):
+    return session.get(Group, group_id)

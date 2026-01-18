@@ -49,3 +49,11 @@ async def get_user_groups(aios: ClientSession, user_id: int) -> list[GroupInfo]:
         logging.error(resp.text)
 
     return [GroupInfo(id=group['id'], name=group['title']) for group in await resp.json()]
+
+
+async def get_group_name(aios: ClientSession, group_id: int) -> str:
+    resp = await aios.get(f"{command_base_url}/groups/{group_id}")
+    if resp.status != 200:
+        logging.error(resp.text)
+    data = await resp.json()
+    return data["title"]
