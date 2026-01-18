@@ -1,14 +1,15 @@
-from aiogram import Router
 import logging
+
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiohttp import ClientSession
 
-from bot_app.api.subscriptions import get_user_groups, GroupInfo
-from bot_app.commands.groups_kb import create_kb, ACTION_EMPTY, ACTION_PAGE, get_group_name
 from bot_app.api.api import get_stats
+from bot_app.api.subscriptions import get_user_groups
+from bot_app.commands.groups_kb import create_kb, ACTION_EMPTY, ACTION_PAGE, get_group_name
 
 router = Router()
 
@@ -61,6 +62,7 @@ def format_stats_report(chat_title: str, stats: dict) -> str:
 
     return "\n".join(lines)
 
+
 @router.message(Command(commands=["stats"]))
 async def stats_cmd_start(message: Message, aiohttp_session: ClientSession, state: FSMContext):
     groups = await get_user_groups(aiohttp_session, message.from_user.id)
@@ -71,14 +73,13 @@ async def stats_cmd_start(message: Message, aiohttp_session: ClientSession, stat
     await message.answer("📊 Выберите чат для просмотра статистики:", reply_markup=markup)
 
 
-@router.callback_query(StatsCBDataFactory.filter(lambda c: c.action == ACTION_STATS))
+@router.callback_query(StatsCBDataFactory.filter(F.action == ACTION_STATS))
 async def stats_show(
-    callback: CallbackQuery,
-    callback_data: StatsCBDataFactory,
-    aiohttp_session: ClientSession,
-    state: FSMContext
+        callback: CallbackQuery,
+        callback_data: StatsCBDataFactory,
+        aiohttp_session: ClientSession,
+        state: FSMContext
 ):
-
     chat_id = callback_data.payload
     page_groups = (await state.get_data()).get("page_groups", [])
     group_name = get_group_name(chat_id, page_groups)
@@ -97,14 +98,15 @@ async def stats_show(
         await state.clear()
 
 
-@router.callback_query(StatsCBDataFactory.filter(lambda c: c.action == ACTION_PAGE))
-async def stats_page_cb(callback: CallbackQuery, callback_data: StatsCBDataFactory, aiohttp_session: ClientSession, state: FSMContext):
+@router.callback_query(StatsCBDataFactory.filter(F.action == ACTION_PAGE))
+async def stats_page_cb(callback: CallbackQuery, callback_data: StatsCBDataFactory, aiohttp_session: ClientSession,
+                        state: FSMContext):
     groups = await get_user_groups(aiohttp_session, callback.from_user.id)
     markup = await create_kb(groups, ACTION_STATS, StatsCBDataFactory, state, current_page=callback_data.payload)
     await callback.message.edit_reply_markup(reply_markup=markup)
     await callback.answer()
 
 
-@router.callback_query(StatsCBDataFactory.filter(lambda c: c.action == ACTION_EMPTY))
+@router.callback_query(StatsCBDataFactory.filter(F.action == ACTION_EMPTY))
 async def stats_nop_cb(callback: CallbackQuery):
     await callback.answer()

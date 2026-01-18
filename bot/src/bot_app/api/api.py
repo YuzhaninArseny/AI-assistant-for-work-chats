@@ -86,7 +86,7 @@ async def draft(aios: ClientSession, chat_id: int) -> str:
 
 async def get_stats(aios: ClientSession, chat_id: int) -> dict:
     try:
-        resp = await aios.post(f"{command_base_url}/chats/{chat_id}/stats")
+        resp = await aios.get(f"{command_base_url}/chats/{chat_id}/stats")
     except Exception as e:
         logging.error(f"Error fetching stats for chat {chat_id}: {e}")
         raise
