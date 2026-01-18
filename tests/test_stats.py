@@ -131,24 +131,40 @@ def test_stats_single_user(db_setup, chromadb):
 
 
 def test_stats_exactly_14_days_included(db_setup, chromadb):
-    """Сообщение ровно 14 дней назад (00:00 GMT+5) — должно быть включено."""
+    """Сообщение, отправленное ровно 14 дней назад от текущего момента, должно быть включено."""
     saver_client = TestClient(saver_app)
     command_client = TestClient(command_app)
 
-    # Сегодня: 2026-01-18 12:00 UTC → 2026-01-18 17:00 GMT+5
-    now_utc = datetime.datetime(2026, 1, 18, 12, 0, 0, tzinfo=datetime.timezone.utc)
-    # 14 дней назад в GMT+5: 2026-01-05 00:00 GMT+5 → 2026-01-04 19:00 UTC
-    boundary_utc = datetime.datetime(2026, 1, 4, 19, 0, 0, tzinfo=datetime.timezone.utc)
-    ts = int(boundary_utc.timestamp())
+    # Определяем "сейчас" в GMT+5
+    tz_gmt5 = datetime.timezone(datetime.timedelta(hours=5))
+    now_gmt5 = datetime.datetime.now(tz_gmt5)
+    today_gmt5 = now_gmt5.date()
 
-    msg = make_message(chat_id=200, user_id=600, text="Edge", timestamp=ts, message_id=1)
+    # Целевой день: ровно 13 дней назад (чтобы был включён в 14-дневный период)
+    target_day_gmt5 = today_gmt5 - datetime.timedelta(days=13)  # например, 05 января, если сегодня 18
+
+    # Время в UTC для этого дня: 00:00 GMT+5 → соответствующее UTC
+    target_datetime_gmt5 = datetime.datetime.combine(target_day_gmt5, datetime.time.min, tzinfo=tz_gmt5)
+    target_timestamp = int(target_datetime_gmt5.timestamp())
+
+    # Отправляем сообщение с этим timestamp'ом
+    msg = TelegramMessage(
+        message_id=1,
+        chat=TelegramChat(id=200, title="Test Chat"),
+        date=target_timestamp,
+        from_=TelegramUser(id=600, username="testuser"),
+        text="Edge case message"
+    )
     send_messages_to_saver(saver_client, chromadb, [msg])
 
+    # Запрашиваем статистику — репозиторий использует своё datetime.now()
     response = command_client.get("/chats/200/stats")
     stats = ChatStats(**response.json())
-    # Должен быть день '2026-01-05'
-    assert "2026-01-05" in stats.daily_activity
-    day_data = stats.daily_activity["2026-01-05"]
+
+    # Ожидаем, что день target_day_gmt5 присутствует
+    expected_day = target_day_gmt5.strftime("%Y-%m-%d")
+    assert expected_day in stats.daily_activity
+    day_data = stats.daily_activity[expected_day]
     assert len(day_data) == 1
     assert day_data[0].user_id == 600
 
