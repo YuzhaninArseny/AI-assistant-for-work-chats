@@ -16,7 +16,7 @@ class FakeDraftClient:
         assert url in {"/draft", "/draft/"}
         assert json['messages']
         for msg in json['messages']:
-            assert msg.content
+            assert msg["text"]
 
         # ServiceClient возвращает обычные объекты, а не json-репрезентацию
         # поэтому это строка без кавычек внутри
