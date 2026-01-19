@@ -27,7 +27,13 @@ async def start(message: Message, command: CommandObject, aiohttp_session: Clien
 
 @router.message(CommandStart())
 async def start(message: Message):
-    await message.answer("стартанули")
+    await message.answer("""Список команд:
+
+1. `/groups` - список групп, которые вы добавили
+2. `/search` - поиск по ключевым словам (через пробел)
+3. `/draft` - создать черновик ответа для группы
+4. `/summary` - краткая выжимка обсуждений
+5. `/stats` - статистика сообщений""", parse_mode='markdown')
 
 
 @router.message()
