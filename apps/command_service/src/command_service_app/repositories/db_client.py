@@ -1,3 +1,4 @@
+import datetime
 import os
 from contextlib import asynccontextmanager
 from typing import Iterable, Annotated
@@ -5,8 +6,8 @@ from typing import Iterable, Annotated
 from fastapi import Depends, FastAPI
 from sqlmodel import select, Session, desc, create_engine, SQLModel
 
-from shared.models.messages import Message
 from shared.models.base import Base
+from shared.models.messages import Message
 
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT") or "5432"
@@ -38,7 +39,12 @@ class DbClient:
         self.session = session
 
     def get_chat_messages(self, chat_id: int, limit: int | None = None) -> Iterable[Message]:
-        query = select(Message).where(Message.chat_id == chat_id, Message.content != None).order_by(desc(Message.time_sent))
+        day_ago = datetime.datetime.now() - datetime.timedelta(days=1)
+        query = (select(Message)
+                 .where(Message.chat_id == chat_id,
+                        Message.content != None,
+                        Message.time_sent > day_ago)
+                 .order_by(desc(Message.time_sent)))
         if limit is not None:
             query = query.limit(limit)
 

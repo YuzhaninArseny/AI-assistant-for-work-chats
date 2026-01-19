@@ -46,11 +46,11 @@ def deps_setup():
     Base.metadata.drop_all(engine)
 
 
-def add_test_messages(session, chat_id):
+def add_test_messages(session, chat_id, date):
     msg = Message(
         message_id=1,
         chat_id=chat_id,
-        time_sent=datetime.datetime(year=2025, month=1, day=1),
+        time_sent=date,
         user_id=987,
         username="admin",
         content=f"msg content",
@@ -60,13 +60,15 @@ def add_test_messages(session, chat_id):
     session.commit()
 
 
-@pytest.mark.parametrize("with_messages", [False, True])
+@pytest.mark.parametrize("with_messages", ["no", "old", "new"])
 def test_draft(deps_setup, with_messages):
     client = TestClient(app)
     db_session = app.dependency_overrides[get_session]()
-    if with_messages:
-        add_test_messages(db_session, 123)
-
+    today = datetime.datetime.now() - datetime.timedelta(hours=3)
+    if with_messages == "old":
+        add_test_messages(db_session, 123, datetime.datetime(year=2025, month=1, day=1))
+    elif with_messages == "new":
+        add_test_messages(db_session, 123, today)
     response = client.get(
         "/draft/",
         params={"chat_id": 123}
@@ -75,7 +77,7 @@ def test_draft(deps_setup, with_messages):
     data = response.json()
     print(data)
     assert response.status_code == 200
-    if with_messages:
+    if with_messages == "new":
         assert data == 'это фейковый текст драфта'
     else:
         assert data == "Невозможно составить черновик ответа - вопросов не обнаружено"

@@ -21,20 +21,25 @@ class FakeSummarizationModel:
 
 
 class FakeDbClient:
-    fill: bool
+    fill: str
 
-    def __init__(self, fill: bool):
+    def __init__(self, fill: str):
         self.fill = fill
 
     def get_chat_messages(self, chat_id: int, limit: int | None = None) -> Iterable[Message]:
-        if not self.fill:
+        if self.fill == "no":
             return []
+
+        if self.fill == "old":
+            return []
+        else:
+            date = datetime.datetime.now() - datetime.timedelta(hours=3)
 
         return [
             Message(
                 message_id=i,
                 chat_id=chat_id,
-                time_sent=datetime.datetime(year=2025, month=1, day=1),
+                time_sent=date,
                 user_id=987,
                 username="admin",
                 content=f"msg {i}",
@@ -67,7 +72,7 @@ def deps_setup():
     Base.metadata.drop_all(engine)
 
 
-@pytest.mark.parametrize("with_messages", [True, False], ids=['With messages', 'Without messages'])
+@pytest.mark.parametrize("with_messages", ["no", "old", "new"])
 def test_summarize(deps_setup, with_messages):
     client = TestClient(app)
 
@@ -87,7 +92,7 @@ def test_summarize(deps_setup, with_messages):
 
     # по дефолту фастапи возвращает JSON,
     # поэтому мы получаем не просто текст, а JSON строку
-    if with_messages:
+    if with_messages == "new":
         assert data == '"Эффективная суммаризация для чата"'
     else:
         assert data == '"В чате нет активности"'
