@@ -2,6 +2,7 @@ from logging import getLogger, INFO
 
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
+from starlette.status import HTTP_409_CONFLICT
 
 from command_service_app.repositories.db_client import SessionDep
 from shared.models.group_membership import GroupMembership, Group
@@ -27,6 +28,10 @@ def add_user_to_group(session: SessionDep, user_id: int, group_id: int):
     logger.info(f"Adding user {user_id} to group {group_id}")
     if session.get(Group, group_id) is None:
         raise HTTPException(400, "Unknown group")
+    select_query = select(GroupMembership).where(GroupMembership.user_id == user_id,
+                                                 GroupMembership.group_id == group_id)
+    if session.exec(select_query).first() is not None:
+        raise HTTPException(HTTP_409_CONFLICT, "User already in group")
     session.add(GroupMembership(user_id=user_id, group_id=group_id))
     session.commit()
 
@@ -49,3 +54,8 @@ def my_groups(session: SessionDep, user_id: int):
     query = (select(Group).join(GroupMembership, GroupMembership.group_id == Group.id)
              .where(GroupMembership.user_id == user_id))
     return session.exec(query).all()
+
+
+@router.get('/{group_id}')
+def get_group_info(session: SessionDep, group_id: int):
+    return session.get(Group, group_id)

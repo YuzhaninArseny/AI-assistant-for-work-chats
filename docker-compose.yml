@@ -69,9 +69,7 @@ services:
 
   chroma:
     platform: linux/amd64
-    build:
-      context: ./apps/chroma
-      dockerfile: Dockerfile
+    image: cowabangerrrrr/ai-assistant-for-work-chats-chroma:1.0
     environment:
       - TRANSFORMERS_CACHE=/data/models
       - HF_HOME=/data/models

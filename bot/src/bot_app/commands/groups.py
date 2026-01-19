@@ -44,21 +44,20 @@ async def group_page_cb(callback: CallbackQuery, callback_data: GroupsCBDataFact
 
 @router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_VIEW_GROUP))
 async def group_view_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory, state: FSMContext):
-    keyborad_builder = InlineKeyboardBuilder()
-    keyborad_builder.row(InlineKeyboardButton(
-        text="Unsubscribe",
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.row(InlineKeyboardButton(
+        text="Отписаться",
         callback_data=GroupsCBDataFactory(action=ACTION_UNSUBSCRIBE, payload=callback_data.payload).pack()
     ))
-    markup = keyborad_builder.as_markup()
+    markup = keyboard_builder.as_markup()
 
     group_name = get_group_name(callback_data.payload, await state.get_value("page_groups"))
-    await callback.message.answer(f"Инфо про группу {group_name}", reply_markup=markup)
+    await callback.message.answer(f"Группа: {group_name}", reply_markup=markup)
     await callback.answer()
 
 
 @router.callback_query(GroupsCBDataFactory.filter(F.action == ACTION_UNSUBSCRIBE))
 async def group_unsub_cb(callback: CallbackQuery, callback_data: GroupsCBDataFactory, aiohttp_session: ClientSession):
-    # TODO: error handling
     success = await unsubscribe_user(aiohttp_session, callback.from_user.id, callback_data.payload)
     if success:
         await callback.message.answer(f"Вы отписаны от группы")

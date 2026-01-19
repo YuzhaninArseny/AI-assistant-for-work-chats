@@ -16,6 +16,8 @@ async def subscribe_user(aios: ClientSession, user_id: int, group_id: int):
         f"{command_base_url}/groups/add-user",
         params={"user_id": user_id, "group_id": group_id}
     )
+    if resp.status == 409:
+        return
     if resp.status != 200:
         logging.error(resp.text)
 
@@ -49,3 +51,11 @@ async def get_user_groups(aios: ClientSession, user_id: int) -> list[GroupInfo]:
         logging.error(resp.text)
 
     return [GroupInfo(id=group['id'], name=group['title']) for group in await resp.json()]
+
+
+async def get_group_name(aios: ClientSession, group_id: int) -> str:
+    resp = await aios.get(f"{command_base_url}/groups/{group_id}")
+    if resp.status != 200:
+        logging.error(resp.text)
+    data = await resp.json()
+    return data["title"]
